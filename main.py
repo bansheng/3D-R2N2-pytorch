@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
 if (sys.version_info < (3, 0)):
-    raise Exception("Please follow the installation instruction on 'https://github.com/chrischoy/3D-R2N2'")
+    raise Exception(
+        "Please follow the installation instruction on 'https://github.com/chrischoy/3D-R2N2'")
 
 import numpy as np
 import argparse
@@ -101,8 +102,10 @@ def main():
     if args.out_path is not None:
         cfg_from_list(['DIR.OUT_PATH', args.out_path])
     if args.weights is not None:
-        cfg_from_list(['CONST.WEIGHTS', args.weights, 'TRAIN.RESUME_TRAIN', True,
-                       'TRAIN.INITIAL_ITERATION', int(args.init_iter)])
+        cfg_from_list([
+            'CONST.WEIGHTS', args.weights, 'TRAIN.RESUME_TRAIN', True, 'TRAIN.INITIAL_ITERATION',
+            int(args.init_iter)
+        ])
 
     print('Using config:')
     pprint.pprint(cfg)
@@ -111,11 +114,11 @@ def main():
         train_net()
     else:
         test_net()
-    
+
 
 if __name__ == '__main__':
     mp.log_to_stderr()
     logger = mp.get_logger()
     logger.setLevel(logging.INFO)
-    
+
     main()

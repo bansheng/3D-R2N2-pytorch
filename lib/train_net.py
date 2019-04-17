@@ -35,8 +35,8 @@ def train_net():
     # Set up the model and the solver
     NetClass = load_model(cfg.CONST.NETWORK_CLASS)
 
-    print('Network definition: \n')
-    print(inspect.getsource(NetClass.network_definition))
+    # print('Network definition: \n')
+    # print(inspect.getsource(NetClass.network_definition))
     net = NetClass()
 
     # Check that single view reconstruction net is not used for multi view

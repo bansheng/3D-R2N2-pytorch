@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastEditors: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-17 17:35:04
+@LastEditTime: 2019-04-17 17:42:38
 '''
 import torch
 from torch.autograd import Variable
@@ -80,7 +80,7 @@ class BaseGRUNet(Net):
             h = gru_out
 
             u = update_gate
-            u_list.append(u)ß
+            u_list.append(u)
 
         out = self.decoder(h)
         """
