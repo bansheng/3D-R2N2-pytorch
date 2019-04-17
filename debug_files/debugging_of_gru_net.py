@@ -4,7 +4,7 @@ import numpy as np
 import theano
 import theano.tensor as tensor
 
-from models.net import Net, tensor5
+from models.net import Net
 from lib.layers import TensorProductLayer, ConvLayer, PoolLayer, Unpool3DLayer, \
     LeakyReLU, SoftmaxWithLoss3D, Conv3DLayer, InputLayer, FlattenLayer, \
     FCConv3DLayer, TanhLayer, SigmoidLayer, ComplementLayer, AddLayer, \

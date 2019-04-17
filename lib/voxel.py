@@ -6,8 +6,10 @@ def evaluate_voxel_prediction(preds, gt, thresh):
     diff = np.sum(np.logical_xor(preds_occupy, gt[:, 1, :, :]))
     intersection = np.sum(np.logical_and(preds_occupy, gt[:, 1, :, :]))
     union = np.sum(np.logical_or(preds_occupy, gt[:, 1, :, :]))
-    num_fp = np.sum(np.logical_and(preds_occupy, gt[:, 0, :, :]))  # false positive
-    num_fn = np.sum(np.logical_and(np.logical_not(preds_occupy), gt[:, 1, :, :]))  # false negative
+    num_fp = np.sum(np.logical_and(
+        preds_occupy, gt[:, 0, :, :]))  # false positive
+    num_fn = np.sum(np.logical_and(np.logical_not(
+        preds_occupy), gt[:, 1, :, :]))  # false negative
     return np.array([diff, intersection, union, num_fp, num_fn])
 
 
@@ -28,14 +30,15 @@ def voxel2mesh(voxels, surface_view):
     curr_vert = 0
 
     positions = np.where(voxels > 0.3)
-    voxels[positions] = 1 
+    voxels[positions] = 1
     for i, j, k in zip(*positions):
-        # identifies if current voxel has an exposed face 
+        # identifies if current voxel has an exposed face
         if not surface_view or np.sum(voxels[i-1:i+2, j-1:j+2, k-1:k+2]) < 27:
-            verts.extend(scale * (cube_verts + cube_dist_scale * np.array([[i, j, k]])))
+            verts.extend(
+                scale * (cube_verts + cube_dist_scale * np.array([[i, j, k]])))
             faces.extend(cube_faces + curr_vert)
-            curr_vert += len(cube_verts)  
-              
+            curr_vert += len(cube_verts)
+
     return np.array(verts), np.array(faces)
 
 
@@ -53,20 +56,21 @@ def write_obj(filename, verts, faces):
             f.write('f %d %d %d\n' % tuple(face))
 
 
-def voxel2obj(filename, pred, surface_view = True):
+def voxel2obj(filename, pred, surface_view=True):
     verts, faces = voxel2mesh(pred, surface_view)
     write_obj(filename, verts, faces)
-    
+
+
 if __name__ == '__main__':
-    #read binvox data and convert to ndarray
-    from binvox_rw import read_as_3d_array
+    # read binvox data and convert to ndarray
+    from lib.binvox_rw import read_as_3d_array
     import theano
     with open("model.binvox", 'rb') as f:
-            voxel = read_as_3d_array(f)
+        voxel = read_as_3d_array(f)
     voxel_data = voxel.data
-    batch_voxel = np.zeros((1, 32, 2, 32, 32), dtype=theano.config.floatX) 
+    batch_voxel = np.zeros((1, 32, 2, 32, 32), dtype=theano.config.floatX)
     batch_voxel[0, :, 0, :, :] = voxel_data < 1
     batch_voxel[0, :, 1, :, :] = voxel_data
     print(batch_voxel.shape)
-    #write obj file
-    voxel2obj("category1data2.obj",batch_voxel[0, :, 1, :, :])
+    # write obj file
+    voxel2obj("category1data2.obj", batch_voxel[0, :, 1, :, :])

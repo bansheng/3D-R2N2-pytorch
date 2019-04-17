@@ -1,19 +1,29 @@
+# coding=UTF-8
+'''
+@Description: 
+@Author: dingyadong
+@Github: https://github.com/bansheng
+@LastEditors: dingyadong
+@since: 2019-04-17 11:23:11
+@LastEditTime: 2019-04-17 16:31:03
+'''
 '''
 Parallel data loading functions
 '''
 import sys
 import time
-import theano
-import numpy as np
 import traceback
+from multiprocessing import Event, Process
+
+import numpy as np
+import theano
 from PIL import Image
 from six.moves import queue
-from multiprocessing import Process, Event
 
+from lib.binvox_rw import read_as_3d_array
 from lib.config import cfg
 from lib.data_augmentation import preprocess_img
-from lib.data_io import get_voxel_file, get_rendering_file
-from lib.binvox_rw import read_as_3d_array
+from lib.data_io import get_rendering_file, get_voxel_file
 
 
 def print_error(func):
