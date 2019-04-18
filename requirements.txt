@@ -1,5 +1,6 @@
 numpy>=1.16
-Theano>=1.0.4
+pytorch>=1.0.0
+theano>=1.0.4
 EasyDict
 Pillow
 pyyaml

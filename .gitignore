@@ -5,26 +5,11 @@
 ._*
 *.DS_Store
 
-# Wiki page
-wiki/
-
 # Results
 output/
 
 # vscode
 .vscode/settings.json
 
-# z*.py
-z*.py
-
-# .style.yapf
-.style.yapf
-
 # pylintrc
 .pylintrc
-
-# debug_files
-/debug_files
-
-# z*.py
-/z_py
