@@ -28,6 +28,6 @@ python3 main.py \
       --test \
       --batch-size 1 \
       --out $OUT_PATH \
-      --weights $OUT_PATH/weights.npy \
+      --weights $OUT_PATH/checkpoint.tar \
       --model $NET_NAME \
       ${*:1}

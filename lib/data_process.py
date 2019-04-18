@@ -126,7 +126,7 @@ class ReconstructionDataProcess(DataProcess):
             db_inds = self.get_next_minibatch()
 
             # We will sample # views
-            if cfg.TRAIN.RANDOM_NUM_VIEWS:
+            if cfg.TRAIN.RANDOM_NUM_VIEWS: # true
                 curr_n_views = np.random.randint(n_views) + 1
             else:
                 curr_n_views = n_views
@@ -159,7 +159,7 @@ class ReconstructionDataProcess(DataProcess):
         print('Exiting')
 
     def load_img(self, category, model_id, image_id):
-        image_fn = get_rendering_file(category, model_id, image_id)
+        image_fn = get_rendering_file(category, model_id, image_id) #获得文件绝对路径
         im = Image.open(image_fn)
 
         t_im = preprocess_img(im, self.train)

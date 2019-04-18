@@ -68,6 +68,10 @@ def train_net():
 
     net.cuda()
 
+    # print the queue
+    # print(train_queue)
+    # print(val_queue)
+
     # Generate the solver
     solver = Solver(net)
 

@@ -25,3 +25,6 @@ z*.py
 
 # debug_files
 /debug_files
+
+# z*.py
+/z_py

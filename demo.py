@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastEditors: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-17 17:13:28
+@LastEditTime: 2019-04-18 10:17:52
 '''
 import os
 import shutil
@@ -32,10 +32,10 @@ Reconstruction, ECCV 2016
 if sys.version_info < (3, 0):
     raise Exception(
         "Please follow the installation \
-            instruction on 'https://github.com/chrischoy/3D-R2N2'")
+            instruction on 'https://github.com/bansheng/3D-R2N2-pytorch'")
 
 
-DEFAULT_WEIGHTS = 'output/ResidualGRUNet/default_model/weights.npy'
+DEFAULT_WEIGHTS = 'output/ResidualGRUNet/default_model/checkpoint.tar'
 
 
 def cmd_exists(cmd):
@@ -53,7 +53,7 @@ def download_model(fn):
 def load_demo_images():
     ims = []
     for i in range(3):
-        im = preprocess_img(Image.open('imgs/%d.jpg' %
+        im = preprocess_img(Image.open('imgs/%d.jpg' % #进来的时候是127*127*3
                                        i).resize((127, 127)), train=False)
         ims.append([np.array(im).transpose(
             (2, 0, 1)).astype(np.float32)])
@@ -78,8 +78,8 @@ def main():
 
     # Define a network and a solver. Solver provides a wrapper for the test function.
     net = NetClass(compute_grad=False)  # instantiate a network
-    net.load(DEFAULT_WEIGHTS)                        # load downloaded weights
     solver = Solver(net)                # instantiate a solver
+    solver.load(DEFAULT_WEIGHTS)        # load pretrained weights
 
     # Run the network
     voxel_prediction, _ = solver.test_output(demo_imgs)
