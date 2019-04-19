@@ -18,4 +18,4 @@ output/
 *.md
 
 # test
-/lib/test.py
+lib/test.py

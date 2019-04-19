@@ -9,3 +9,4 @@ with open('/Users/dingyadong/Documents/GitHub/01-3D-R2N2/ShapeNet/ShapeNetVox32/
     batch_voxel1 = voxel_data < 1
     batch_voxel2 = voxel_data
     print(batch_voxel2 == 0)
+
