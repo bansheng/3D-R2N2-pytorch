@@ -16,3 +16,6 @@ output/
 
 # .md
 *.md
+
+# test
+/lib/test.py
