@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastEditors: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-18 10:16:33
+@LastEditTime: 2019-04-18 11:10:38
 '''
 import numpy as np
 # import torch
@@ -224,7 +224,7 @@ class encoder(nn.Module):
         for i in range(num_pooling):
             # image downsampled by pooling layers
             #w_out= np.floor((w_in+ 2*padding[0]- dilation[0]*(kernel_size[0]- 1)- 1)/stride[0]+ 1)
-            fc7_feat_w = np.floor(
+            fc7_feat_w = np.floor( # np.floor返回不大于输入参数的最大整数
                 (fc7_feat_w + 2 * 1 - 1 * (2 - 1) - 1) / 2 + 1)
             fc7_feat_h = np.floor(
                 (fc7_feat_h + 2 * 1 - 1 * (2 - 1) - 1) / 2 + 1)
@@ -260,7 +260,7 @@ class decoder(nn.Module):
         # 3d conv9
         self.conv9a = Conv3d(
             n_deconvfilter[2], n_deconvfilter[3], 3, padding=1)
-        self.bn9a = BatchNorm3d(n_deconvfilter[3])
+        self.bn9a = BatchNorm3d(n_deconvfilter[3]) #batch normolization
         self.conv9b = Conv3d(
             n_deconvfilter[3], n_deconvfilter[3], 3, padding=1)
         self.bn9b = BatchNorm3d(n_deconvfilter[3])

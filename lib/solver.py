@@ -1,13 +1,22 @@
+# coding=UTF-8
+'''
+@Description:
+@Author: dingyadong
+@Github: https://github.com/bansheng
+@LastEditors: dingyadong
+@since: 2019-04-17 11:23:11
+@LastEditTime: 2019-04-18 21:43:27
+'''
 import os
 import sys
 from datetime import datetime
 
+import torch
+from torch.autograd import Variable
+from torch.optim import SGD, Adam, lr_scheduler
+
 from lib.config import cfg
 from lib.utils import Timer, has_nan
-
-import torch
-from torch.optim import SGD, Adam, lr_scheduler
-from torch.autograd import Variable
 
 
 def max_or_nan(params):
@@ -111,8 +120,6 @@ class Solver(object):
 
             # Apply one gradient step
             train_timer.tic()
-            #             print(batch_img.shape)
-            #             print(batch_voxel.shape)
             loss = self.train_loss(batch_img, batch_voxel)
             train_timer.toc()
 
@@ -125,8 +132,14 @@ class Solver(object):
                 #or using torch.optim.lr_scheduler
                 print('Learing rate decreased to %f: ' % cfg.TRAIN.LEARNING_RATES[str(train_ind)])
 
+            '''
+            @TODO(dingyadong): loss dynamic Visualization
+            '''
+
+            # '''
             # Debugging modules
-            #
+            # '''
+            
             # Print status, run validation, check divergence, and save model.
             if train_ind % cfg.TRAIN.PRINT_FREQ == 0:
                 # Print the current loss
@@ -163,11 +176,7 @@ class Solver(object):
         symlink to the latest param so that the training function can easily
         load the latest model'''
 
-        save_path = ''
-        if step != cfg.TRAIN.NUM_ITERATION:
-            save_path = os.path.join(save_dir, 'checkpoint.%d.tar' % (step))
-        else:
-            save_path = os.path.join(save_dir, 'checkpoint.tar')
+        save_path = os.path.join(save_dir, 'checkpoint.%d.tar' % (step))
 
         #both states of the network and the optimizer need to be saved
         state_dict = {'net_state': self.net.state_dict()}
@@ -189,7 +198,7 @@ class Solver(object):
     def load(self, filename):
         if os.path.isfile(filename):
             print("loading checkpoint from '{}'".format(filename))
-            checkpoint = torch.load(filename)
+            checkpoint = torch.load(filename, map_location=lambda storage, loc: storage)
 
             net_state = checkpoint['net_state']
             optim_state = checkpoint['optimizer_state']
@@ -208,24 +217,29 @@ class Solver(object):
         In test mode, if y is not None, then the out is [prediction, loss].
         """
         x = torch.FloatTensor(x)
-        y = torch.FloatTensor(y)
+        if y is not None:
+            y = torch.FloatTensor(y)
 
-        if torch.cuda.is_available():
+        if torch.cuda.is_available() and y is not None:
             x.cuda(async=True)
             y.cuda(async=True)
             x = x.type(torch.cuda.FloatTensor)
             y = y.type(torch.cuda.FloatTensor)
 
         x = Variable(x, requires_grad=False)
-        y = Variable(y, requires_grad=False)
+        if y is not None:
+            y = Variable(y, requires_grad=False)
 
         # Parse the result
         results = self.net(x, y, test=True)
         prediction = results[0]
-        loss = results[1]
-        activations = results[2:]
 
-        if y is None:
+        activations = None
+        if len(results) > 2:
+            activations = results[2:]
+
+        if y is None: #没有loss
             return prediction, activations
         else:
+            loss = results[1]
             return prediction, loss, activations

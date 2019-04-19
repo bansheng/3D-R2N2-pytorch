@@ -3,19 +3,18 @@ Parallel data loading functions
 '''
 import sys
 import time
+import traceback
+from multiprocessing import Event, Process
 
 import numpy as np
-import traceback
+import torch
 from PIL import Image
 from six.moves import queue
-from multiprocessing import Process, Event
 
+from lib.binvox_rw import read_as_3d_array
 from lib.config import cfg
 from lib.data_augmentation import preprocess_img
-from lib.data_io import get_voxel_file, get_rendering_file
-from lib.binvox_rw import read_as_3d_array
-
-import torch
+from lib.data_io import get_rendering_file, get_voxel_file
 
 
 def print_error(func):
@@ -43,7 +42,7 @@ class DataProcess(Process):
         # Queue to transfer the loaded mini batches
         self.data_queue = data_queue
         self.data_paths = data_paths
-        self.num_data = len(data_paths)
+        self.num_data = len(data_paths) #这个num_data指有多少类
         self.repeat = repeat
 
         # Tuple of data shape
@@ -114,12 +113,12 @@ class ReconstructionDataProcess(DataProcess):
     @print_error
     def run(self):
         # set up constants
-        img_h = cfg.CONST.IMG_W
-        img_w = cfg.CONST.IMG_H
-        n_vox = cfg.CONST.N_VOX
+        img_h = cfg.CONST.IMG_W # 127
+        img_w = cfg.CONST.IMG_H # 127
+        n_vox = cfg.CONST.N_VOX # 32
 
         # This is the maximum number of views
-        n_views = cfg.CONST.N_VIEWS
+        n_views = cfg.CONST.N_VIEWS # 5
 
         while not self.exit.is_set() and self.cur <= self.num_data:
             # To insure that the network sees (almost) all images per epoch

@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastEditors: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-18 10:19:11
+@LastEditTime: 2019-04-18 21:18:48
 '''
 import datetime as dt
 
@@ -18,7 +18,7 @@ from lib.utils import weight_init
 
 class Net(nn.Module):
 
-    def __init__(self, random_seed=dt.datetime.now().microsecond, compute_grad=True):
+    def __init__(self, random_seed=dt.datetime.now().microsecond):
         print("\ninitializing \"Net\"")
         super(Net, self).__init__()
         self.rng = np.random.RandomState(random_seed)

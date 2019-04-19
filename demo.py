@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastEditors: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-18 10:17:52
+@LastEditTime: 2019-04-18 22:36:32
 '''
 import os
 import shutil
@@ -21,6 +21,7 @@ from lib.data_augmentation import preprocess_img
 from lib.solver import Solver
 from lib.voxel import voxel2obj
 from models import load_model
+import torch
 
 '''
 Demo code for the paper
@@ -48,6 +49,8 @@ def download_model(fn):
         print('Downloading a pretrained model')
         call(['curl', 'ftp://cs.stanford.edu/cs/cvgl/ResidualGRUNet.npy',
               '--create-dirs', '-o', fn])
+    else:
+        print('A pretrained model detected!')
 
 
 def load_demo_images():
@@ -57,8 +60,8 @@ def load_demo_images():
                                        i).resize((127, 127)), train=False)
         ims.append([np.array(im).transpose(
             (2, 0, 1)).astype(np.float32)])
-        plt.imshow(im)
-        plt.show()
+        # plt.imshow(im)
+        # plt.show()
     return np.array(ims)
 
 
@@ -75,18 +78,23 @@ def main():
 
     # Use the default network model
     NetClass = load_model('ResidualGRUNet')
+    
+    print(NetClass)
 
     # Define a network and a solver. Solver provides a wrapper for the test function.
-    net = NetClass(compute_grad=False)  # instantiate a network
+    net = NetClass()  # instantiate a network
     solver = Solver(net)                # instantiate a solver
     solver.load(DEFAULT_WEIGHTS)        # load pretrained weights
 
     # Run the network
     voxel_prediction, _ = solver.test_output(demo_imgs)
-
     # Save the prediction to an OBJ file (mesh file).
+    # (self.batch_size, 2, n_vox, n_vox, n_vox)
+    # print((voxel_prediction[0, 1, :, :, :] > cfg.TEST.VOXEL_THRESH))
+    # print(type(voxel_prediction[0, :, 1, :, :].data.numpy()))
+    # print(type(cfg.TEST.VOXEL_THRESH))
     voxel2obj(pred_file_name,
-              voxel_prediction[0, :, 1, :, :] > cfg.TEST.VOXEL_THRESH)
+              voxel_prediction[0, 1, :, :, :].data.numpy() > cfg.TEST.VOXEL_THRESH) # modified
 
     # Use meshlab or other mesh viewers to visualize the prediction.
     # For Ubuntu>=14.04, you can install meshlab using

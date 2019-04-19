@@ -1,5 +1,6 @@
 numpy>=1.16
 pytorch>=1.0.0
+torchvision
 theano>=1.0.4
 EasyDict
 Pillow
