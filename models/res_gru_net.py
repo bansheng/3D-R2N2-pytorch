@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastEditors: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-18 11:10:38
+@LastEditTime: 2019-04-19 15:24:55
 '''
 import numpy as np
 # import torch
@@ -52,7 +52,7 @@ class ResidualGRUNet(BaseGRUNet):
 ##########################################################################################
 class encoder(nn.Module):
     def __init__(self, input_shape, n_convfilter,
-                 n_fc_filters, h_shape, conv3d_filter_shape):
+                 n_fc_filters, h_shape, conv3d_filter_shape): #n_convfilter = [96, 128, 256, 256, 256, 256]
         print("\ninitializing \"encoder\"")
         #input_shape = (self.batch_size, 3, img_w, img_h)
         super(encoder, self).__init__()
