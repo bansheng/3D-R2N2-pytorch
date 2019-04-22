@@ -5,13 +5,12 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-22 09:52:16
+@lastTime: 2019-04-22 16:05:40
 '''
 import os
 import sys
 from datetime import datetime
 
-import matplotlib.pyplot as plot
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -109,8 +108,10 @@ class Solver(object):
             self.load(cfg.CONST.WEIGHTS)
             start_iter = cfg.TRAIN.INITIAL_ITERATION
 
-        plot.figure(1, figsize=(12, 5))
-        plot.ion()
+        if cfg.TRAIN.SHOW_LOSS: # 要动态打印
+            import matplotlib.pyplot as plot
+            plot.figure(1, figsize=(12, 5))
+            plot.ion()
 
         # Main training loop
         for train_ind in range(start_iter, cfg.TRAIN.NUM_ITERATION + 1):
@@ -134,7 +135,10 @@ class Solver(object):
             # print(loss.data.numpy())
             # print(loss.data.numpy().shape)
             # print(type(loss.data.numpy()))
-            training_losses.append(loss.data.numpy())
+            if(torch.cuda.is_available()):
+                training_losses.append(loss.cpu().data.numpy())
+            else:
+                training_losses.append(loss.data.numpy())
 
             # Decrease learning rate at certain points
             if train_ind in lr_steps:
@@ -154,10 +158,11 @@ class Solver(object):
                 @TODO(dingyadong): loss dynamic Visualization
                 '''
                 # plot
-                if(train_ind != 0)
-                steps = np.linspace(0, train_ind, train_ind+1, dtype=np.float32)
-                plot.plot(steps, training_losses, 'b-')
-                plot.draw()
+                if(train_ind != 0):
+                    steps = np.linspace(0, train_ind, train_ind+1, dtype=np.float32)
+                    if cfg.TRAIN.SHOW_LOSS: # 要动态打印
+                        plot.plot(steps, training_losses, 'b-')
+                        plot.draw()
                 # plot.pause(0.05)
 
             if train_ind % cfg.TRAIN.VALIDATION_FREQ == 0 and val_queue is not None:
@@ -186,8 +191,9 @@ class Solver(object):
                 print("Cost exceeds the threshold. Stop training")
                 break
         
-        plot.ioff()
-        plot.show()
+        if cfg.TRAIN.SHOW_LOSS: # 要动态打印
+            plot.ioff()
+            plot.show()
 
     def save(self, training_losses, save_dir, step):
         ''' Save the current network parameters to the save_dir and make a

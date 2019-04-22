@@ -66,7 +66,7 @@ def train_net():
         repeat=True,
         train=False)
 
-    import torch
+    import torch.cuda
     if torch.cuda.is_available():
         net.cuda()
 
