@@ -18,8 +18,8 @@ echo Logging output to "$LOG"
 export THEANO_FLAGS="floatX=float32,device=cuda0,optimizer_including=cudnn,assert_no_cpu_op='raise'"
 
 python3 main.py \
-      --batch-size 24 \
-      --iter 60000 \
+      --batch-size 20 \
+      --iter 20000 \
       --out $OUT_PATH \
       --model $NET_NAME \
       ${*:1}

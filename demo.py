@@ -3,9 +3,9 @@
 @Description: 
 @Author: dingyadong
 @Github: https://github.com/bansheng
-@LastEditors: dingyadong
+@LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-18 22:36:32
+@lastTime: 2019-04-22 16:51:17
 '''
 import os
 import shutil
@@ -86,7 +86,7 @@ def main():
     solver = Solver(net)                # instantiate a solver
     solver.load(DEFAULT_WEIGHTS)        # load pretrained weights
 
-    # Run the network
+    # Run the network 返回的是prediction 和 activation
     voxel_prediction, _ = solver.test_output(demo_imgs)
     # Save the prediction to an OBJ file (mesh file).
     # (self.batch_size, 2, n_vox, n_vox, n_vox)

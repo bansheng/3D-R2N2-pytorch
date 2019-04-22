@@ -83,6 +83,7 @@ __C.TRAIN.WEIGHT_DECAY = 0.00005
 __C.TRAIN.LOSS_LIMIT = 2  # stop training if the loss exceeds the limit
 __C.TRAIN.SAVE_FREQ = 10000  # weights will be overwritten every save_freq
 __C.TRAIN.PRINT_FREQ = 40
+__C.TRAIN.SHOW_LOSS = False
 
 #
 # Testing options

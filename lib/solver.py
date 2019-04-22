@@ -5,13 +5,12 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-22 09:52:16
+@lastTime: 2019-04-22 17:11:46
 '''
 import os
 import sys
 from datetime import datetime
 
-import matplotlib.pyplot as plot
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -37,8 +36,9 @@ def max_or_nan(params):
 
 class Solver(object):
 
-    def __init__(self, net):
-        self.net = net
+    def __init__(self, Generator, Discriminator):
+        self.Generator = Generator
+        self.Discriminator = Discriminator
         self.lr = cfg.TRAIN.DEFAULT_LEARNING_RATE
         print('Set the learning rate to %f.' % self.lr)
 
@@ -49,14 +49,20 @@ class Solver(object):
         """
         This function is used to set the optimization algorithm of training 
         """
-        net = self.net
+        Generator = self.Generator
+        Discriminator = self.Discriminator
+
         lr = self.lr
         w_decay = cfg.TRAIN.WEIGHT_DECAY
         if policy == 'sgd':
             momentum = cfg.TRAIN.MOMENTUM
-            self.optimizer = SGD(net.parameters(), lr=lr, weight_decay=w_decay, momentum=momentum)
+            self.optimizerG = SGD(Generator.parameters(), \
+                                    lr=lr, weight_decay=w_decay, momentum=momentum)
+            self.optimizerD = SGD(Discriminator.parameters(), \
+                                    lr=lr, weight_decay=w_decay, momentum=momentum)
         elif policy == 'adam':
-            self.optimizer = Adam(net.parameters(), lr=lr, weight_decay=w_decay)
+            self.optimizerG = Adam(Generator.parameters(), lr=lr, weight_decay=w_decay)
+            self.optimizerD = Adam(Discriminator.parameters(), lr=lr, weight_decay=w_decay)
         else:
             sys.exit('Error: Unimplemented optimization policy')
 
@@ -76,12 +82,22 @@ class Solver(object):
         x = Variable(x, requires_grad=False)
         y = Variable(y, requires_grad=False)
 
-        loss = self.net(x, y, test=False)
+        G_predict = self.Generator(x)[0]
+
+        prob_artist0 = D(y)          # D try to increase this prob
+        prob_artist1 = D(G_predict)               # D try to reduce this prob
+
+        D_loss = - torch.mean(torch.log(prob_artist0) + torch.log(1. - prob_artist1))
+        G_loss = torch.mean(torch.log(1. - prob_artist1))
 
         #compute gradient and do parameter update step
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
+        self.optimizerD.zero_grad()
+        D_loss.backward()
+        self.optimizerD.step()
+
+        self.optimizerG.zero_grad()
+        G_loss.backward()
+        self.optimizerG.step()
 
         return loss
 
@@ -109,8 +125,10 @@ class Solver(object):
             self.load(cfg.CONST.WEIGHTS)
             start_iter = cfg.TRAIN.INITIAL_ITERATION
 
-        plot.figure(1, figsize=(12, 5))
-        plot.ion()
+        if cfg.TRAIN.SHOW_LOSS: # 要动态打印
+            import matplotlib.pyplot as plot
+            plot.figure(1, figsize=(12, 5))
+            plot.ion()
 
         # Main training loop
         for train_ind in range(start_iter, cfg.TRAIN.NUM_ITERATION + 1):
@@ -120,7 +138,7 @@ class Solver(object):
             batch_img, batch_voxel = train_queue.get()
             data_timer.toc()
 
-            if self.net.is_x_tensor4:
+            if self.Generator.is_x_tensor4:
                 batch_img = batch_img[0]
 
             # Apply one gradient step
@@ -134,7 +152,10 @@ class Solver(object):
             # print(loss.data.numpy())
             # print(loss.data.numpy().shape)
             # print(type(loss.data.numpy()))
-            training_losses.append(loss.data.numpy())
+            if(torch.cuda.is_available()):
+                training_losses.append(loss.cpu().data.numpy())
+            else:
+                training_losses.append(loss.data.numpy())
 
             # Decrease learning rate at certain points
             if train_ind in lr_steps:
@@ -154,10 +175,11 @@ class Solver(object):
                 @TODO(dingyadong): loss dynamic Visualization
                 '''
                 # plot
-                if(train_ind != 0)
-                steps = np.linspace(0, train_ind, train_ind+1, dtype=np.float32)
-                plot.plot(steps, training_losses, 'b-')
-                plot.draw()
+                if(train_ind != 0):
+                    steps = np.linspace(0, train_ind, train_ind+1, dtype=np.float32)
+                    if cfg.TRAIN.SHOW_LOSS: # 要动态打印
+                        plot.plot(steps, training_losses, 'b-')
+                        plot.draw()
                 # plot.pause(0.05)
 
             if train_ind % cfg.TRAIN.VALIDATION_FREQ == 0 and val_queue is not None:
@@ -173,7 +195,7 @@ class Solver(object):
 
             if train_ind % cfg.TRAIN.NAN_CHECK_FREQ == 0:
                 # Check that the network parameters are all valid
-                nan_or_max_param = max_or_nan(self.net.parameters())
+                nan_or_max_param = max_or_nan(self.Generator.parameters())
                 if has_nan(nan_or_max_param):
                     print('NAN detected')
                     break
@@ -186,8 +208,9 @@ class Solver(object):
                 print("Cost exceeds the threshold. Stop training")
                 break
         
-        plot.ioff()
-        plot.show()
+        if cfg.TRAIN.SHOW_LOSS: # 要动态打印
+            plot.ioff()
+            plot.show()
 
     def save(self, training_losses, save_dir, step):
         ''' Save the current network parameters to the save_dir and make a
@@ -197,8 +220,9 @@ class Solver(object):
         save_path = os.path.join(save_dir, 'checkpoint.%d.tar' % (step))
 
         #both states of the network and the optimizer need to be saved
-        state_dict = {'net_state': self.net.state_dict()}
-        state_dict.update({'optimizer_state': self.optimizer.state_dict()})
+        state_dict = {'net_state': self.Generator.state_dict()}
+        state_dict.update({'optimizerD_state': self.optimizerD.state_dict()})
+        state_dict.update({'optimizerG_state': self.optimizerG.state_dict()})
         torch.save(state_dict, save_path)
 
         # Make a symlink for weights.npy
@@ -219,10 +243,14 @@ class Solver(object):
             checkpoint = torch.load(filename, map_location=lambda storage, loc: storage)
 
             net_state = checkpoint['net_state']
-            optim_state = checkpoint['optimizer_state']
+            optim_stateD = checkpoint['optimizerD_state']
+            optim_stateG = checkpoint['optimizerG_state']
 
-            self.net.load_state_dict(net_state)
-            self.optimizer.load_state_dict(optim_state)
+
+            self.Generator.load_state_dict(net_state)
+            self.optimizerD.load_state_dict(optim_stateD)
+            self.optimizerG.load_state_dict(optim_stateG)
+
         else:
             raise Exception("no checkpoint found at '{}'".format(filename))
 
@@ -249,15 +277,15 @@ class Solver(object):
             y = Variable(y, requires_grad=False)
 
         # Parse the result
-        results = self.net(x, y, test=True)
+        results = self.Generator(x, y, test=True)
         prediction = results[0]
 
         activations = None
-        if len(results) > 2:
+        if len(results) > 2: # 有activations
             activations = results[2:]
 
         if y is None: #没有loss
             return prediction, activations
-        else:
+        else: # 有loss
             loss = results[1]
             return prediction, loss, activations

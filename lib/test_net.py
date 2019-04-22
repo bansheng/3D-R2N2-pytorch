@@ -33,7 +33,9 @@ def test_net():
 
     net = NetworkClass()
     
-    net.cuda()
+    import torch.cuda
+    if torch.cuda.is_available():
+        net.cuda()
     
     solver = Solver(net)
     solver.load(cfg.CONST.WEIGHTS)
