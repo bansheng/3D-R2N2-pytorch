@@ -22,3 +22,6 @@ lib/test.py
 
 # ShapeNet
 /ShapeNet
+
+# .obj
+*.obj
