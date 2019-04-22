@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastEditors: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-18 10:15:56
+@LastEditTime: 2019-04-19 18:57:51
 '''
 import torch
 from torch.autograd import Variable
@@ -43,7 +43,7 @@ class BaseGRUNet(Net):
         self.n_fc_filters = [1024]
         # number of filters for each 3d convolution layer in the decoder
         self.n_deconvfilter = [128, 128, 128, 64, 32, 2]
-        # the size of the hidden state
+        # the size of the hidden state 隐藏层状态 4
         self.h_shape = (self.batch_size, self.n_deconvfilter[0], self.n_gru_vox, self.n_gru_vox,
                         self.n_gru_vox)
         # the filter shape of the 3d convolutional gru unit

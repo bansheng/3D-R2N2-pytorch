@@ -3,14 +3,16 @@
 @Description:
 @Author: dingyadong
 @Github: https://github.com/bansheng
-@LastEditors: dingyadong
+@LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-18 21:43:27
+@lastTime: 2019-04-22 09:52:16
 '''
 import os
 import sys
 from datetime import datetime
 
+import matplotlib.pyplot as plot
+import numpy as np
 import torch
 from torch.autograd import Variable
 from torch.optim import SGD, Adam, lr_scheduler
@@ -27,7 +29,7 @@ def max_or_nan(params):
 
     for param_idx, param in enumerate(params):
         # If there is nan, max will return nan
-        #Note that param is Variable
+        # Note that param is Variable
         nan_or_max_param[param_idx] = torch.max(torch.abs(param)).data
         print('param %d : %f' % (param_idx, nan_or_max_param[param_idx]))
     return nan_or_max_param
@@ -107,6 +109,9 @@ class Solver(object):
             self.load(cfg.CONST.WEIGHTS)
             start_iter = cfg.TRAIN.INITIAL_ITERATION
 
+        plot.figure(1, figsize=(12, 5))
+        plot.ion()
+
         # Main training loop
         for train_ind in range(start_iter, cfg.TRAIN.NUM_ITERATION + 1):
             self.lr_scheduler.step()
@@ -124,7 +129,12 @@ class Solver(object):
             train_timer.toc()
 
             #             print(loss)
-            training_losses.append(loss.data)
+            # training_losses.append(loss.data)  转换为numpy数组
+            # print(type(loss))
+            # print(loss.data.numpy())
+            # print(loss.data.numpy().shape)
+            # print(type(loss.data.numpy()))
+            training_losses.append(loss.data.numpy())
 
             # Decrease learning rate at certain points
             if train_ind in lr_steps:
@@ -132,18 +142,23 @@ class Solver(object):
                 #or using torch.optim.lr_scheduler
                 print('Learing rate decreased to %f: ' % cfg.TRAIN.LEARNING_RATES[str(train_ind)])
 
-            '''
-            @TODO(dingyadong): loss dynamic Visualization
-            '''
-
             # '''
             # Debugging modules
             # '''
             
             # Print status, run validation, check divergence, and save model.
-            if train_ind % cfg.TRAIN.PRINT_FREQ == 0:
+            if train_ind % cfg.TRAIN.PRINT_FREQ == 0: #40
                 # Print the current loss
                 print('%s Iter: %d Loss: %f' % (datetime.now(), train_ind, loss))
+                '''
+                @TODO(dingyadong): loss dynamic Visualization
+                '''
+                # plot
+                if(train_ind != 0)
+                steps = np.linspace(0, train_ind, train_ind+1, dtype=np.float32)
+                plot.plot(steps, training_losses, 'b-')
+                plot.draw()
+                # plot.pause(0.05)
 
             if train_ind % cfg.TRAIN.VALIDATION_FREQ == 0 and val_queue is not None:
                 # Print test loss and params to check convergence every N iterations
@@ -170,6 +185,9 @@ class Solver(object):
             if loss.data > cfg.TRAIN.LOSS_LIMIT:
                 print("Cost exceeds the threshold. Stop training")
                 break
+        
+        plot.ioff()
+        plot.show()
 
     def save(self, training_losses, save_dir, step):
         ''' Save the current network parameters to the save_dir and make a

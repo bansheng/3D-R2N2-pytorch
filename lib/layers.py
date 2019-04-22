@@ -53,14 +53,14 @@ class BN_FCConv3DLayer_torch(nn.Module):
         super(BN_FCConv3DLayer_torch, self).__init__()
         self.output_shape = output_shape
 
-        #fc_layer is not the same as fc7
+        #fc_layer is not the same as fc7 无偏置
         self.fc_layer = nn.Linear(
             fc_w_fan_in, int(np.prod(output_shape[1:])), bias=False)
 
-        #filter_shape = (in_channels, out_channels, kernel_d, kernel_h, kernel_w)
+        #filter_shape = (in_channels, out_channels, kernel_d, kernel_h, kernel_w) 无偏置
         self.conv3d = nn.Conv3d(filter_shape[0], filter_shape[1], \
-                                kernel_size= filter_shape[2], \
-                                padding= int((filter_shape[2] - 1) / 2), bias=False)
+                                kernel_size=filter_shape[2], \
+                                padding=int((filter_shape[2] - 1) / 2), bias=False)
 
         #define the recurrent batch normalization layers
         #input channels is the output channels of FCConv3DLayer_torch and T_max is the maximum number of views
@@ -73,7 +73,7 @@ class BN_FCConv3DLayer_torch(nn.Module):
         self.bias = nn.Parameter(
             torch.FloatTensor(1, output_shape[1], 1, 1, 1).fill_(0.1))
 
-    def forward(self, fc7, h, time):
+    def forward(self, fc7, h, time): # fc7为x h为h_{t-1}
         #fc7 is the leakyReLU-ed ouput of fc7 layer
         #h is the hidden state of the previous time step
         fc7 = self.fc_layer(fc7).view(*self.output_shape)
@@ -144,22 +144,22 @@ class SoftmaxWithLoss3D(nn.Module):
         Before actually compute the loss, we need to address the possible numberical instability.
         If some elements of inputs are very large, and we compute their exponential value, then we
         might encounter some infinity. So we need to subtract them by the largest value along the 
-        "channels" dimension to avoid very large exponential.
+        "channels" dimension to avoid very large exponential. 防止e^x过大
         """
         #the size of inputs and y is (batch_size, channels, depth, height, width)
         #torch.max return a tuple of (max_value, index_of_max_value)
-        max_channel = torch.max(inputs, dim=1, keepdim=True)[0]
-        adj_inputs = inputs - max_channel
+        max_channel = torch.max(inputs, dim=1, keepdim=True)[0] #找到最大值
+        adj_inputs = inputs - max_channel #把最大值舍弃
 
-        exp_x = torch.exp(adj_inputs)
+        exp_x = torch.exp(adj_inputs) # e^x > 0
         sum_exp_x = torch.sum(exp_x, dim=1, keepdim=True)
 
         #if the ground truth is provided the loss will be computed
         if y is not None: # (batch_size, 2, N_vox, N_vox, N_vox)
-            loss = torch.mean(\
-                              torch.sum(- y * adj_inputs, dim = 1, keepdim = True) + \
-                              torch.log(sum_exp_x))
+            loss = torch.mean(torch.sum(- y * adj_inputs, dim=1, keepdim=True) + torch.log(sum_exp_x))
             # (batch_size, 1, N_vox, N_vox, N_vox)
+        # return tensor.mean( 
+        #     tensor.sum(-y * self.input, axis=2, keepdims=True) + tensor.log(self.sum_exp_x))
 
         #if this is in the test mode, then the prediction and loss need to be returned
         if test:
@@ -203,7 +203,7 @@ class Recurrent_BatchNorm3d(nn.Module):
             self.register_parameter('weight', None)
             self.register_parameter('bias', None)
 
-        #if track_running_stats is True, 
+        #if track_running_stats is True,
         # this module will track the running mean and running variance
         for i in range(T_max):
             self.register_buffer('running_mean_{}'.format(i), \

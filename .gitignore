@@ -19,3 +19,6 @@ output/
 
 # test
 lib/test.py
+
+# ShapeNet
+/ShapeNet

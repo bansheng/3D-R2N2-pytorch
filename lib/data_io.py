@@ -30,8 +30,8 @@ def category_model_id_pair(dataset_portion=[]):
         model_path = os.path.join(cfg.DIR.SHAPENET_QUERY_PATH, cat['id'])
         # category = cat['name']
         models = model_names(model_path)
-        for m in models:
-            print(m)
+        # for m in models:
+        #     print(m)
         num_models = len(models)
 
         portioned_models = models[int(num_models * dataset_portion[0]):int(num_models *

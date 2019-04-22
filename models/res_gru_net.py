@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastEditors: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-19 15:24:55
+@LastEditTime: 2019-04-21 22:21:23
 '''
 import numpy as np
 # import torch
@@ -113,10 +113,11 @@ class encoder(nn.Module):
 
         # define the FCConv3DLayers in 3d convolutional gru unit
         #conv3d_filter_shape = (self.n_deconvfilter[0], self.n_deconvfilter[0], 3, 3, 3)
+        # 128*128*3*3*3
         self.t_x_s_update = BN_FCConv3DLayer_torch(
-            n_fc_filters[0], conv3d_filter_shape, h_shape)
-        self.t_x_s_reset = BN_FCConv3DLayer_torch(
-            n_fc_filters[0], conv3d_filter_shape, h_shape)
+            n_fc_filters[0], conv3d_filter_shape, h_shape) #n_convfilter = [96, 128, 256, 256, 256, 256]
+        self.t_x_s_reset = BN_FCConv3DLayer_torch(  # n_deconvfilter = [128, 128, 128, 64, 32, 2]
+            n_fc_filters[0], conv3d_filter_shape, h_shape) # 1024
         self.t_x_rs = BN_FCConv3DLayer_torch(
             n_fc_filters[0], conv3d_filter_shape, h_shape)
 
@@ -238,7 +239,7 @@ class encoder(nn.Module):
 
 
 class decoder(nn.Module):
-    def __init__(self, n_deconvfilter, h_shape):
+    def __init__(self, n_deconvfilter, h_shape):#n_deconvfilter = [128, 128, 128, 64, 32, 2]
         print("\ninitializing \"decoder\"")
         super(decoder, self).__init__()
         # 3d conv7
