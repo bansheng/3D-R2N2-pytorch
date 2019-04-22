@@ -14,11 +14,11 @@ output/
 # pylintrc
 .pylintrc
 
-# .md
-*.md
-
 # test
 lib/test.py
 
 # ShapeNet
 /ShapeNet
+
+# .obj
+*.obj

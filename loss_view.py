@@ -21,7 +21,7 @@ def file_read(files):
 if __name__ == '__main__':
 
     plt.figure(1, figsize=(12, 10))
-    lines = file_read(['loss.20000.txt'])
+    lines = file_read(['loss.10000.txt'])
     colors = ['red', 'blue', 'green', 'yellow']
     # lines[0] = lines[0][:2001]
     xmax = 0
