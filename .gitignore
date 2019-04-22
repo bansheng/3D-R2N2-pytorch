@@ -28,3 +28,6 @@ z*.py
 
 # z*.py
 /z_py
+
+# output
+/ShapeNet
