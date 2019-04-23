@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-23 08:56:45
+@lastTime: 2019-04-23 09:03:16
 '''
 import os
 import sys
@@ -37,7 +37,7 @@ def max_or_nan(params):
 class Solver(object):
 
     def __init__(self, Generator, Discriminator):
-        self.x`x`Generator = Generator
+        self.Generator = Generator
         self.Discriminator = Discriminator
         self.Discriminator = Discriminator
         self.lr = cfg.TRAIN.DEFAULT_LEARNING_RATE
@@ -55,7 +55,7 @@ class Solver(object):
 
         lr = self.lr
         w_decay = cfg.TRAIN.WEIGHT_DECAY
-        if policy == 'sgd':
+        if policy == 'sgd': # 随机梯度下降
             momentum = cfg.TRAIN.MOMENTUM
             self.optimizerG = SGD(Generator.parameters(), \
                                     lr=lr, weight_decay=w_decay, momentum=momentum)
