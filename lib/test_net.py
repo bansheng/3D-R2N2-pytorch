@@ -14,6 +14,7 @@ from lib.data_process import make_data_processes, get_while_running
 
 from lib.voxel import evaluate_voxel_prediction
 
+from models.gan import Discriminator
 
 def test_net():
     ''' Evaluate the network '''
@@ -32,12 +33,14 @@ def test_net():
     #print(inspect.getsource(NetworkClass.network_definition))
 
     net = NetworkClass()
-    
+    discriminator = Discriminator()
+
     import torch.cuda
     if torch.cuda.is_available():
         net.cuda()
+        discriminator.cuda()
     
-    solver = Solver(net)
+    solver = Solver(net, discriminator)
     solver.load(cfg.CONST.WEIGHTS)
 
     # set constants

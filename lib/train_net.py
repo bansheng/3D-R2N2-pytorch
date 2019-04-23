@@ -3,6 +3,7 @@ from multiprocessing import Queue
 
 # Training related functions
 from models import load_model
+from models.gan import Discriminator
 from lib.config import cfg
 from lib.solver import Solver
 from lib.data_io import category_model_id_pair
@@ -38,7 +39,7 @@ def train_net():
     # print('Network definition: \n')
     # print(inspect.getsource(NetClass.network_definition))
     net = NetClass()
-
+    discriminator = Discriminator()
     # Check that single view reconstruction net is not used for multi view
     # reconstruction.
     if net.is_x_tensor4 and cfg.CONST.N_VIEWS > 1:
@@ -69,13 +70,14 @@ def train_net():
     import torch.cuda
     if torch.cuda.is_available():
         net.cuda()
+        discriminator.cuda()
 
     # print the queue
     # print(train_queue)
     # print(val_queue)
 
     # Generate the solver
-    solver = Solver(net)
+    solver = Solver(net, discriminator)
 
     # Train the network
     solver.train(train_queue, val_queue)

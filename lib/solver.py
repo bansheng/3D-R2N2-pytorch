@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-22 20:04:32
+@lastTime: 2019-04-23 08:56:45
 '''
 import os
 import sys
@@ -37,7 +37,8 @@ def max_or_nan(params):
 class Solver(object):
 
     def __init__(self, Generator, Discriminator):
-        self.Generator = Generator
+        self.x`x`Generator = Generator
+        self.Discriminator = Discriminator
         self.Discriminator = Discriminator
         self.lr = cfg.TRAIN.DEFAULT_LEARNING_RATE
         print('Set the learning rate to %f.' % self.lr)
@@ -47,7 +48,7 @@ class Solver(object):
 
     def set_optimizer(self, policy=cfg.TRAIN.POLICY):
         """
-        This function is used to set the optimization algorithm of training 
+        This function is used to set the optimization algorithm of training
         """
         Generator = self.Generator
         Discriminator = self.Discriminator
@@ -82,24 +83,24 @@ class Solver(object):
         x = Variable(x, requires_grad=False)
         y = Variable(y, requires_grad=False)
 
-        G_predict = self.Generator(x)[0]
+        G_predict = self.Generator(x)[0] # return [prediction]
 
-        prob_artist0 = D(y)          # D try to increase this prob
-        prob_artist1 = D(G_predict)               # D try to reduce this prob
+        prob_artist0 = self.Discriminator(y)          # D try to increase this prob
+        prob_artist1 = self.Discriminator(G_predict)  # D try to reduce this prob
 
         D_loss = - torch.mean(torch.log(prob_artist0) + torch.log(1. - prob_artist1))
         G_loss = torch.mean(torch.log(1. - prob_artist1))
 
         #compute gradient and do parameter update step
         self.optimizerD.zero_grad()
-        D_loss.backward()
+        D_loss.backward(retain_graph=True)
         self.optimizerD.step()
 
         self.optimizerG.zero_grad()
         G_loss.backward()
         self.optimizerG.step()
 
-        return loss
+        return D_loss
 
     def train(self, train_queue, val_queue=None):
         ''' Given data queues, train the network '''
@@ -117,7 +118,9 @@ class Solver(object):
         lr_steps = [int(k) for k in cfg.TRAIN.LEARNING_RATES.keys()]
 
         #Setup the lr_scheduler
-        self.lr_scheduler = lr_scheduler.MultiStepLR(self.optimizer, lr_steps, gamma=0.1)
+        self.lr_schedulerG = lr_scheduler.MultiStepLR(self.optimizerG, lr_steps, gamma=0.1)
+        self.lr_schedulerD = lr_scheduler.MultiStepLR(self.optimizerD, lr_steps, gamma=0.1)
+
 
         start_iter = 0
         # Resume training
@@ -132,7 +135,8 @@ class Solver(object):
 
         # Main training loop
         for train_ind in range(start_iter, cfg.TRAIN.NUM_ITERATION + 1):
-            self.lr_scheduler.step()
+            self.lr_schedulerG.step()
+            self.lr_schedulerD.step()
 
             data_timer.tic()
             batch_img, batch_voxel = train_queue.get()

@@ -5,47 +5,69 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-22 16:32:22
-@lastTime: 2019-04-22 16:34:58
+@lastTime: 2019-04-22 20:54:45
 '''
-
+import datetime as dt
 import numpy as np
 # import torch
 import torch.nn as nn
-# from torch.autograd import Variable
-from torch.nn import (BatchNorm2d, BatchNorm3d, Conv2d, Conv3d, LeakyReLU,
-                      Linear, MaxPool2d, Sigmoid, Tanh)
 
-D = nn.Sequential(                      # Discriminator
-    nn.Linear(ART_COMPONENTS+1, 128),   # receive art work either from the famous artist or a newbie like G with label
-    nn.ReLU(),
-    nn.Linear(128, 1),
-    nn.Sigmoid(),                       # tell the probability that the art work is made by artist
-)
+from lib.utils import weight_init
 
-opt_G = torch.optim.Adam(G.parameters(), lr=LR_G)
+# Generator1 = nn.Sequential(                      # Discriminator
+#     nn.Linear(2, 128),   # receive art work either from the famous artist or a newbie like G with label
+#     nn.BatchNorm3d(128),
+#     nn.ReLU(),
+#     nn.Linear(128, 1),   # receive art work either from the famous artist or a newbie like G with label
+#     nn.BatchNorm3d(1),
+#     nn.Sigmoid()
+# )
 
-plt.ion()   # something about continuous plotting
 
-for step in range(10000):
-    artist_paintings, labels = artist_works_with_labels()           # real painting, label from artist
-    G_ideas = torch.randn(BATCH_SIZE, N_IDEAS)                      # random ideas
-    G_inputs = torch.cat((G_ideas, labels), 1)                      # ideas with labels
-    G_paintings = G(G_inputs)                                       # fake painting w.r.t label from G
+class Discriminator(nn.Module):
 
-    D_inputs0 = torch.cat((artist_paintings, labels), 1)            # all have their labels
-    D_inputs1 = torch.cat((G_paintings, labels), 1)
-    prob_artist0 = D(D_inputs0)                 # D try to increase this prob
-    prob_artist1 = D(D_inputs1)                 # D try to reduce this prob
+    def __init__(self, random_seed=dt.datetime.now().microsecond):
+        print("\ninitializing \"Discriminator\"")
+        super(Discriminator, self).__init__()
+        self.rng = np.random.RandomState(random_seed)
 
-    D_score0 = torch.log(prob_artist0)          # maximise this for D
-    D_score1 = torch.log(1. - prob_artist1)     # maximise this for D
-    D_loss = - torch.mean(D_score0 + D_score1)  # minimise the negative of both two above for D
-    G_loss = torch.mean(D_score1)               # minimise D score w.r.t G
+        self.l1 = nn.Conv3d(2, 128, 1)
+        self.b1 = nn.BatchNorm3d(128)
+        self.r1 = nn.ReLU()
+        self.l2 = nn.Conv3d(128, 1, 3)
+        self.b2 = nn.BatchNorm3d(1)
+        self.s1 = nn.Sigmoid()
 
-    opt_D.zero_grad()
-    D_loss.backward(retain_graph=True)      # reusing computational graph
-    opt_D.step()
+        self.parameter_init()
 
-    opt_G.zero_grad()
-    G_loss.backward()
-    opt_G.step()
+    def parameter_init(self):
+        #initialize all the parameters of the gru net
+        for m in self.modules():
+            if isinstance(m, (nn.Conv2d, nn.Conv3d)):
+                # """
+                # For Conv2d, the shape of the weight is 
+                # (out_channels, in_channels, kernel_size[0], kernel_size[1]).
+                # For Conv3d, the shape of the weight is 
+                # (out_channels, in_channels, kernel_size[0], kernel_size[1], kernel_size[2]).
+                # """
+                w_shape = (m.out_channels, m.in_channels, *m.kernel_size)
+                m.weight.data = weight_init(w_shape)
+                if m.bias is not None:
+                    m.bias.data.fill_(0.1)
+            elif isinstance(m, nn.Linear):
+                # """
+                # For Linear module, the shape of the weight is (out_features, in_features)
+                # """
+                w_shape = (m.out_features, m.in_features)
+                m.weight.data = weight_init(w_shape)
+                if m.bias is not None:
+                    m.bias.data.fill_(0.1)
+
+    def forward(self, x):
+        out = self.l1(x)
+        out = self.b1(out)
+        out = self.r1(out)
+        out = self.l2(out)
+        out = self.b2(out)
+        out = self.s1(out)
+        return out
