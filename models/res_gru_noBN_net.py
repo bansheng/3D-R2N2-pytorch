@@ -5,7 +5,7 @@ import torch.nn as nn
 from torch.nn import (Conv2d, Conv3d, LeakyReLU, Linear, MaxPool2d, Sigmoid,
                       Tanh)
 
-from lib.layers import FCConv3DLayer_torch, SoftmaxWithLoss3D, Unpool3DLayer
+from lib.layers import Unpool3DLayer, BN_FCConv3DLayer_torch
 from models.base_gru_net import BaseGRUNet
 
 
@@ -86,14 +86,14 @@ class encoder(nn.Module):
             int(n_convfilter[5] * fc7_feat_w * fc7_feat_h), n_fc_filters[0])
 
         #define the FCConv3DLayers in 3d convolutional gru unit
-        self.t_x_s_update = FCConv3DLayer_torch(n_fc_filters[0],
+        self.t_x_s_update = BN_FCConv3DLayer_torch(n_fc_filters[0],
                                                 conv3d_filter_shape, h_shape)
-        self.t_x_s_reset = FCConv3DLayer_torch(n_fc_filters[0],
+        self.t_x_s_reset = BN_FCConv3DLayer_torch(n_fc_filters[0],
                                                conv3d_filter_shape, h_shape)
-        self.t_x_rs = FCConv3DLayer_torch(n_fc_filters[0], conv3d_filter_shape,
+        self.t_x_rs = BN_FCConv3DLayer_torch(n_fc_filters[0], conv3d_filter_shape,
                                           h_shape)
 
-    def forward(self, x, h, u):
+    def forward(self, x, h, u, time):
         """
         x is the input and the size of x is (batch_size, channels, heights, widths).
         h and u is the hidden state and activation of last time step respectively.
@@ -147,15 +147,15 @@ class encoder(nn.Module):
         fc7 = self.fc7(pool6)
         rect7 = self.leaky_relu(fc7)
 
-        t_x_s_update = self.t_x_s_update(rect7, h)
-        t_x_s_reset = self.t_x_s_reset(rect7, h)
+        t_x_s_update = self.t_x_s_update(rect7, h, time)
+        t_x_s_reset = self.t_x_s_reset(rect7, h, time)
 
         update_gate = self.sigmoid(t_x_s_update)
         complement_update_gate = 1 - update_gate
         reset_gate = self.sigmoid(t_x_s_reset)
 
         rs = reset_gate * h
-        t_x_rs = self.t_x_rs(rect7, rs)
+        t_x_rs = self.t_x_rs(rect7, rs, time)
         tanh_t_x_rs = self.tanh(t_x_rs)
 
         gru_out = update_gate * h + complement_update_gate * tanh_t_x_rs
