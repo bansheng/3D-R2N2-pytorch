@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-23 09:03:16
+@lastTime: 2019-04-23 09:06:36
 '''
 import os
 import sys
@@ -199,8 +199,9 @@ class Solver(object):
 
             if train_ind % cfg.TRAIN.NAN_CHECK_FREQ == 0:
                 # Check that the network parameters are all valid
-                nan_or_max_param = max_or_nan(self.Generator.parameters())
-                if has_nan(nan_or_max_param):
+                nan_or_max_param1 = max_or_nan(self.Generator.parameters())
+                nan_or_max_param2 = max_or_nan(self.Discriminator.parameters())
+                if has_nan(nan_or_max_param1) or has_nan(nan_or_max_param2):
                     print('NAN detected')
                     break
 
@@ -225,8 +226,8 @@ class Solver(object):
 
         #both states of the network and the optimizer need to be saved
         state_dict = {'net_state': self.Generator.state_dict()}
-        state_dict.update({'optimizerD_state': self.optimizerD.state_dict()})
         state_dict.update({'optimizerG_state': self.optimizerG.state_dict()})
+        state_dict.update({'optimizerD_state': self.optimizerD.state_dict()})
         torch.save(state_dict, save_path)
 
         # Make a symlink for weights.npy
@@ -247,13 +248,12 @@ class Solver(object):
             checkpoint = torch.load(filename, map_location=lambda storage, loc: storage)
 
             net_state = checkpoint['net_state']
-            optim_stateD = checkpoint['optimizerD_state']
             optim_stateG = checkpoint['optimizerG_state']
-
+            optim_stateD = checkpoint['optimizerD_state']
 
             self.Generator.load_state_dict(net_state)
-            self.optimizerD.load_state_dict(optim_stateD)
             self.optimizerG.load_state_dict(optim_stateG)
+            self.optimizerD.load_state_dict(optim_stateD)
 
         else:
             raise Exception("no checkpoint found at '{}'".format(filename))
