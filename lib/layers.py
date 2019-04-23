@@ -153,7 +153,7 @@ class SoftmaxWithLoss3D(nn.Module):
 
         exp_x = torch.exp(adj_inputs) # e^x > 0
         sum_exp_x = torch.sum(exp_x, dim=1, keepdim=True)
-
+        
         #if the ground truth is provided the loss will be computed
         if y is not None: # (batch_size, 2, N_vox, N_vox, N_vox)
             loss = torch.mean(torch.sum(- y * adj_inputs, dim=1, keepdim=True) + torch.log(sum_exp_x))
@@ -168,7 +168,8 @@ class SoftmaxWithLoss3D(nn.Module):
                 return [prediction, loss]
             else:
                 return [prediction]
-        return loss
+        else:
+            return loss
 
 
 ###############################################################################

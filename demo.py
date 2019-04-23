@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-22 16:51:17
+@lastTime: 2019-04-23 09:18:44
 '''
 import os
 import shutil
@@ -87,7 +87,7 @@ def main():
     solver.load(DEFAULT_WEIGHTS)        # load pretrained weights
 
     # Run the network 返回的是prediction 和 activation
-    voxel_prediction, _ = solver.test_output(demo_imgs)
+    voxel_prediction, _ = solver.test_output(demo_imgs) # 无y返回的是pred, activations
     # Save the prediction to an OBJ file (mesh file).
     # (self.batch_size, 2, n_vox, n_vox, n_vox)
     # print((voxel_prediction[0, 1, :, :, :] > cfg.TEST.VOXEL_THRESH))

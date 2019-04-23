@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-23 09:06:36
+@lastTime: 2019-04-23 09:46:16
 '''
 import os
 import sys
@@ -83,7 +83,10 @@ class Solver(object):
         x = Variable(x, requires_grad=False)
         y = Variable(y, requires_grad=False)
 
-        G_predict = self.Generator(x)[0] # return [prediction]
+        # loss = self.net(x, y, test=False) return loss
+        result_list = self.Generator(x, y, test=True) # return [prediction ,loss]
+        G_predict = result_list[0]
+        loss = result_list[1]
 
         prob_artist0 = self.Discriminator(y)          # D try to increase this prob
         prob_artist1 = self.Discriminator(G_predict)  # D try to reduce this prob
@@ -100,7 +103,7 @@ class Solver(object):
         G_loss.backward()
         self.optimizerG.step()
 
-        return D_loss
+        return loss
 
     def train(self, train_queue, val_queue=None):
         ''' Given data queues, train the network '''
@@ -270,26 +273,25 @@ class Solver(object):
         if y is not None:
             y = torch.FloatTensor(y)
 
-        if torch.cuda.is_available() and y is not None:
+        if torch.cuda.is_available():
             x.cuda(async=True)
-            y.cuda(async=True)
             x = x.type(torch.cuda.FloatTensor)
-            y = y.type(torch.cuda.FloatTensor)
+            if y is not None:
+                y.cuda(async=True)
+                y = y.type(torch.cuda.FloatTensor)
 
         x = Variable(x, requires_grad=False)
         if y is not None:
             y = Variable(y, requires_grad=False)
 
         # Parse the result
-        results = self.Generator(x, y, test=True)
+        results = self.Generator(x, y, test=True) #test==True 有activation
         prediction = results[0]
 
-        activations = None
-        if len(results) > 2: # 有activations
-            activations = results[2:]
-
         if y is None: #没有loss
+            activations = results[1:]
             return prediction, activations
         else: # 有loss
             loss = results[1]
+            activations = results[2:]
             return prediction, loss, activations

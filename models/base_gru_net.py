@@ -3,9 +3,9 @@
 @Description:
 @Author: dingyadong
 @Github: https://github.com/bansheng
-@LastEditors: dingyadong
+@LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-19 18:57:51
+@lastTime: 2019-04-23 09:30:53
 '''
 import torch
 from torch.autograd import Variable
@@ -90,6 +90,9 @@ class BaseGRUNet(Net):
         """
         out = self.SoftmaxWithLoss3D(out, y=y, test=test)
         if test:
+            # test为真 y为假 返回[pred]
+            # test为真 y为真 返回的是 [pred, loss]
+            # test为假 y为none 返回的是loss
             out.extend(u_list)
         return out
 

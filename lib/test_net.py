@@ -69,7 +69,7 @@ def test_net():
             break
 
         #activations is a list of torch.cuda.FloatTensor
-        pred, loss, activations = solver.test_output(batch_img, batch_voxel)
+        pred, loss, activations = solver.test_output(batch_img, batch_voxel) # 有y返回的是pred, loss, activations
         
         #convert pytorch tensor to numpy array
         pred = pred.data.cpu().numpy()
