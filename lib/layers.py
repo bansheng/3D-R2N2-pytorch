@@ -156,7 +156,10 @@ class SoftmaxWithLoss3D(nn.Module):
 
         #if the ground truth is provided the loss will be computed
         if y is not None: # (batch_size, 2, N_vox, N_vox, N_vox)
-            loss = torch.mean(torch.sum(- y * adj_inputs, dim=1, keepdim=True) + torch.log(sum_exp_x))
+            if not cfg.TRAIN.LOSS_CHANGE:
+                loss = torch.mean(torch.sum(- y * adj_inputs, dim=1, keepdim=True) + torch.log(sum_exp_x))
+            else:
+                loss = torch.mean(torch.sum(- y * adj_inputs, dim=1, keepdim=True) + torch.pow(sum_exp_x, 2))
             # (batch_size, 1, N_vox, N_vox, N_vox)
         # return tensor.mean( 
         #     tensor.sum(-y * self.input, axis=2, keepdims=True) + tensor.log(self.sum_exp_x))
