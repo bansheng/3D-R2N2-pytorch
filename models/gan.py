@@ -31,10 +31,10 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         self.rng = np.random.RandomState(random_seed)
 
-        self.l1 = nn.Conv3d(2, 128, 1)
+        self.l1 = nn.Conv3d(2, 128, 3, stride=1, padding=1) # 2*32*32*32 -> 128*32*32*32
         self.b1 = nn.BatchNorm3d(128)
         self.r1 = nn.ReLU()
-        self.l2 = nn.Conv3d(128, 1, 3)
+        self.l2 = nn.Conv3d(128, 1, 3, stride=1, padding=1) # 128*32*32*32 -> 1*32*32*32
         self.b2 = nn.BatchNorm3d(1)
         self.s1 = nn.Sigmoid()
 

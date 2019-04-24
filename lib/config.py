@@ -71,7 +71,7 @@ __C.TRAIN.SIMPLE_BACKGROUND_RATIO = 0.5  # ratio of the simple backgrounded imag
 
 # Learning
 # For SGD use 0.1, for ADAM, use 0.0001
-__C.TRAIN.DEFAULT_LEARNING_RATE = 1e-3
+__C.TRAIN.DEFAULT_LEARNING_RATE = 1e-4
 __C.TRAIN.POLICY = 'adam'  # def: sgd, adam
 # The EasyDict can't use dict with integers as keys
 __C.TRAIN.LEARNING_RATES = {'20000': 1e-5, '60000': 1e-6}
@@ -81,7 +81,7 @@ __C.TRAIN.MOMENTUM = 0.90
 # (for cross entropy loss). Too high regularization will also hinder training.
 __C.TRAIN.WEIGHT_DECAY = 0.00005
 __C.TRAIN.LOSS_LIMIT = 2  # stop training if the loss exceeds the limit
-__C.TRAIN.SAVE_FREQ = 10000  # weights will be overwritten every save_freq
+__C.TRAIN.SAVE_FREQ = 2000  # weights will be overwritten every save_freq
 __C.TRAIN.PRINT_FREQ = 40
 __C.TRAIN.SHOW_LOSS = False
 

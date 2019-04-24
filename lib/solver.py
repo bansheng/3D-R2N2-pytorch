@@ -85,14 +85,14 @@ class Solver(object):
 
         # loss = self.net(x, y, test=False) return loss
         result_list = self.Generator(x, y, test=True) # return [prediction ,loss]
-        G_predict = result_list[0]
+        G_fake = result_list[0]
         loss = result_list[1]
 
-        prob_artist0 = self.Discriminator(y)          # D try to increase this prob
-        prob_artist1 = self.Discriminator(G_predict)  # D try to reduce this prob
+        D_real = self.Discriminator(y)          # D try to increase this prob
+        D_fake = self.Discriminator(G_fake)  # D try to reduce this prob
 
-        D_loss = - torch.mean(torch.log(prob_artist0) + torch.log(1. - prob_artist1))
-        G_loss = torch.mean(torch.log(1. - prob_artist1))
+        D_loss = - torch.mean(D_real) + torch.mean(D_fake)
+        G_loss = - torch.mean(D_fake)
 
         #compute gradient and do parameter update step
         self.optimizerD.zero_grad()
@@ -103,7 +103,7 @@ class Solver(object):
         G_loss.backward()
         self.optimizerG.step()
 
-        return loss
+        return loss, D_loss
 
     def train(self, train_queue, val_queue=None):
         ''' Given data queues, train the network '''
@@ -150,7 +150,7 @@ class Solver(object):
 
             # Apply one gradient step
             train_timer.tic()
-            loss = self.train_loss(batch_img, batch_voxel)
+            loss, D_loss = self.train_loss(batch_img, batch_voxel)
             train_timer.toc()
 
             #             print(loss)
@@ -177,7 +177,7 @@ class Solver(object):
             # Print status, run validation, check divergence, and save model.
             if train_ind % cfg.TRAIN.PRINT_FREQ == 0: #40
                 # Print the current loss
-                print('%s Iter: %d Loss: %f' % (datetime.now(), train_ind, loss))
+                print('%s Iter: %d || Loss: %f || D_loss: %f' % (datetime.now(), train_ind, loss, D_loss))
                 '''
                 @TODO(dingyadong): loss dynamic Visualization
                 '''
