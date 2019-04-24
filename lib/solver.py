@@ -195,7 +195,7 @@ class Solver(object):
                 val_losses = 0
                 for i in range(cfg.TRAIN.NUM_VALIDATION_ITERATIONS):
                     batch_img, batch_voxel = val_queue.get()
-                    val_loss = self.train_loss(batch_img, batch_voxel)
+                    val_loss, D_loss = self.train_loss(batch_img, batch_voxel)
                     val_losses += val_loss
                 var_losses_mean = val_losses / cfg.TRAIN.NUM_VALIDATION_ITERATIONS
                 print('%s Test loss: %f' % (datetime.now(), var_losses_mean))
