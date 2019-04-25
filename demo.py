@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-25 09:39:52
+@lastTime: 2019-04-25 10:16:53
 '''
 import os
 import shutil
@@ -71,14 +71,28 @@ def load_demo_images():
     return np.array(ims)
 
 
+# def solver_init():
+#     global demo_imgs, solver
+#     # load images
+#     demo_imgs = load_demo_images()
+
+#     # Download and load pretrained weights
+#     download_model(DEFAULT_WEIGHTS)
+
+#     # Use the default network model
+#     NetClass = load_model('ResidualGRUNet')
+
+#     # Define a network and a solver. Solver provides a wrapper for the test function.
+#     net = NetClass()  # instantiate a network
+#     solver = Solver(net)                # instantiate a solver
+
 def main():
     '''Main demo function'''
     # Save prediction into a file named 'prediction.obj' or the given argument
     global pred_file_name
-    if not cfg.TEST.MULTITEST:
+    if not cfg.TEST.MULTITEST or pred_file_name == '':
         pred_file_name = sys.argv[1] if len(sys.argv) > 1 else 'prediction.obj'
 
-    # load images
     demo_imgs = load_demo_images()
 
     # Download and load pretrained weights
@@ -87,13 +101,13 @@ def main():
     # Use the default network model
     NetClass = load_model('ResidualGRUNet')
     
-    print(NetClass)
+    # print(NetClass)
 
     # Define a network and a solver. Solver provides a wrapper for the test function.
     net = NetClass()  # instantiate a network
     solver = Solver(net)                # instantiate a solver
+    
     solver.load(DEFAULT_WEIGHTS)        # load pretrained weights
-
     # Run the network
     voxel_prediction, _ = solver.test_output(demo_imgs)
     # Save the prediction to an OBJ file (mesh file).
@@ -107,6 +121,7 @@ def main():
     # Use meshlab or other mesh viewers to visualize the prediction.
     # For Ubuntu>=14.04, you can install meshlab using
     # `sudo apt-get install meshlab`
+    print('writing voxel to %s' % (pred_file_name))
     if cfg.TEST.CALL_MESHLAB: #需要打开meshlab
         if cmd_exists('meshlab'):
             call(['meshlab', pred_file_name])
@@ -119,4 +134,5 @@ if __name__ == '__main__':
     # Set the batch size to 1
     cfg_from_list(['CONST.BATCH_SIZE', 1])
 
+    # solver_init()
     main()

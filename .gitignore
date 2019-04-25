@@ -22,3 +22,6 @@ lib/test.py
 
 # .obj
 *.obj
+
+# prediction
+/prediction
