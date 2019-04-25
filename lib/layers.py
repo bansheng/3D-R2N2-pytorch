@@ -159,7 +159,7 @@ class SoftmaxWithLoss3D(nn.Module):
             if not cfg.TRAIN.LOSS_CHANGE:
                 loss = torch.mean(torch.sum(- y * adj_inputs, dim=1, keepdim=True) + torch.log(sum_exp_x))
             else:
-                loss = torch.mean(torch.sum(- y * adj_inputs, dim=1, keepdim=True) + torch.pow(sum_exp_x, 2))
+                loss = torch.mean(torch.sum(- y * adj_inputs, dim=1, keepdim=True))
             # (batch_size, 1, N_vox, N_vox, N_vox)
         # return tensor.mean( 
         #     tensor.sum(-y * self.input, axis=2, keepdims=True) + tensor.log(self.sum_exp_x))
