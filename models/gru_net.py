@@ -120,7 +120,7 @@ class encoder(nn.Module):
         self.t_x_rs = BN_FCConv3DLayer_torch(
             n_fc_filters[0], conv3d_filter_shape, h_shape)
 
-    def forward(self, x, h, u， time):
+    def forward(self, x, h, u, time):
         """
         x is the input and the size of x is (batch_size, channels, heights, widths).
         h and u is the hidden state and activation of last time step respectively.
