@@ -3,16 +3,16 @@
 @Description: 
 @Author: dingyadong
 @Github: https://github.com/bansheng
-@LastEditors: dingyadong
+@LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-18 22:36:32
+@lastTime: 2019-04-25 09:39:52
 '''
 import os
 import shutil
 import sys
 from subprocess import call
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
@@ -21,7 +21,8 @@ from lib.data_augmentation import preprocess_img
 from lib.solver import Solver
 from lib.voxel import voxel2obj
 from models import load_model
-import torch
+
+# import torch
 
 '''
 Demo code for the paper
@@ -38,6 +39,11 @@ if sys.version_info < (3, 0):
 
 DEFAULT_WEIGHTS = 'output/ResidualGRUNet/default_model/checkpoint.tar'
 
+pred_file_name = ''
+
+def set_pred_file_name(name):
+    global pred_file_name
+    pred_file_name = name
 
 def cmd_exists(cmd):
     return shutil.which(cmd) is not None
@@ -68,7 +74,9 @@ def load_demo_images():
 def main():
     '''Main demo function'''
     # Save prediction into a file named 'prediction.obj' or the given argument
-    pred_file_name = sys.argv[1] if len(sys.argv) > 1 else 'prediction.obj'
+    global pred_file_name
+    if not cfg.TEST.MULTITEST:
+        pred_file_name = sys.argv[1] if len(sys.argv) > 1 else 'prediction.obj'
 
     # load images
     demo_imgs = load_demo_images()
@@ -99,11 +107,12 @@ def main():
     # Use meshlab or other mesh viewers to visualize the prediction.
     # For Ubuntu>=14.04, you can install meshlab using
     # `sudo apt-get install meshlab`
-    if cmd_exists('meshlab'):
-        call(['meshlab', pred_file_name])
-    else:
-        print('Meshlab not found: please use visualization of your choice to view %s' %
-              pred_file_name)
+    if cfg.TEST.CALL_MESHLAB: #需要打开meshlab
+        if cmd_exists('meshlab'):
+            call(['meshlab', pred_file_name])
+        else:
+            print('Meshlab not found: please use visualization of your choice to view %s' %
+                    pred_file_name)
 
 
 if __name__ == '__main__':
