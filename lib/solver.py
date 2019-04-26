@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-26 19:34:38
+@lastTime: 2019-04-26 20:11:55
 '''
 import os
 import sys
@@ -269,14 +269,11 @@ class Solver(object):
             loss = results[1]
             return prediction, loss, activations
     
-    def graph_view(self, x):
-        x = torch.FloatTensor(x)
-        if torch.cuda.is_available():
-            x.cuda(async=True)
-            x = x.type(torch.cuda.FloatTensor)
-        x = Variable(x, requires_grad=False)
-        
-        from tensorboardX import SummaryWriter
-        with SummaryWriter(log_dir='./log', comment='res_gru') as writer:
-            writer.add_graph(self.net, (x, None, True))
-            writer.close()
+    # def graph_view(self, x):
+    #     import hiddenlayer as hl
+    #     x = torch.FloatTensor(x)
+    #     if torch.cuda.is_available():
+    #         x.cuda(async=True)
+    #         x = x.type(torch.cuda.FloatTensor)
+    #     x = Variable(x)
+    #     hl.build_graph(self.net, (x, ))
