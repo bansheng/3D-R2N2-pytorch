@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-22 16:05:40
+@lastTime: 2019-04-26 19:34:38
 '''
 import os
 import sys
@@ -244,11 +244,12 @@ class Solver(object):
         if y is not None:
             y = torch.FloatTensor(y)
 
-        if torch.cuda.is_available() and y is not None:
+        if torch.cuda.is_available():
             x.cuda(async=True)
-            y.cuda(async=True)
             x = x.type(torch.cuda.FloatTensor)
-            y = y.type(torch.cuda.FloatTensor)
+            if y is not None:
+                y.cuda(async=True)
+                y = y.type(torch.cuda.FloatTensor)
 
         x = Variable(x, requires_grad=False)
         if y is not None:
@@ -267,3 +268,15 @@ class Solver(object):
         else:
             loss = results[1]
             return prediction, loss, activations
+    
+    def graph_view(self, x):
+        x = torch.FloatTensor(x)
+        if torch.cuda.is_available():
+            x.cuda(async=True)
+            x = x.type(torch.cuda.FloatTensor)
+        x = Variable(x, requires_grad=False)
+        
+        from tensorboardX import SummaryWriter
+        with SummaryWriter(log_dir='./log', comment='res_gru') as writer:
+            writer.add_graph(self.net, (x, None, True))
+            writer.close()

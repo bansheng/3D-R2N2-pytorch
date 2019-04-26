@@ -25,3 +25,6 @@ lib/test.py
 
 # prediction
 /prediction
+
+# log
+/log
