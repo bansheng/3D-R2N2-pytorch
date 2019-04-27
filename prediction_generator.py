@@ -3,13 +3,15 @@ import os
 from demo import main, set_pred_file_name
 from lib.config import cfg_from_list
 
-Checkpoint_dir = ['./output/ResidualGRUNet/default_model',
+Checkpoint_dir = [
+                #   './output/ResidualGRUNet/default_model',
                   './output/GRUNet/default_model',
                   './output/ResidualGRUNoBNNet/default_model',
                 #   './output/ResidualGRUNet_theano/default_model',
                   './output/ResidualGRUNet_No_Regularition/default_model'
                   ]
-Pre_dir = ['./prediction/ResidualGRUNet/',
+Pre_dir = [
+        #    './prediction/ResidualGRUNet/',
            './prediction/GRUNet/',
            './prediction/ResidualGRUNoBNNet/',
         #    './prediction/ResidualGRUNet_theano/',
