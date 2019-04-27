@@ -1,29 +1,43 @@
 import os
 
-from demo import main, set_pred_file_name
+from demo import main, set_pred_file_name, set_model_name, set_weights
 from lib.config import cfg_from_list
 
 Checkpoint_dir = [
-                #   './output/ResidualGRUNet/default_model',
-                  './output/GRUNet/default_model',
-                  './output/ResidualGRUNoBNNet/default_model',
-                #   './output/ResidualGRUNet_theano/default_model',
-                  './output/ResidualGRUNet_No_Regularition/default_model'
-                  ]
+    # './output/ResidualGRUNet/default_model',
+    # './output/GRUNet/default_model',
+    # './output/ResidualGRUNoBNNet/default_model',
+    # './output/ResidualGRUNet_theano/default_model',
+    './output/ResidualGRUNet_No_Regularition/default_model'
+]
 Pre_dir = [
-        #    './prediction/ResidualGRUNet/',
-           './prediction/GRUNet/',
-           './prediction/ResidualGRUNoBNNet/',
-        #    './prediction/ResidualGRUNet_theano/',
-           './prediction/ResidualGRUNet_No_Regularition/',
-           ]
+    # './prediction/ResidualGRUNet/',
+    # './prediction/GRUNet/',
+    # './prediction/ResidualGRUNoBNNet/',
+    # './prediction/ResidualGRUNet_theano/',
+    './prediction/ResidualGRUNet_No_Regularition/',
+]
+
+Model_names = [
+    # 'ResidualGRUNet',
+    # 'GRUNet',
+    # 'ResidualGRUNoBNNet',
+    # 'ResidualGRUNet',
+    'ResidualGRUNet',
+]
 
 if __name__ == "__main__":
     # solver_init()
-    for checkpoint_dir, pre_dir in zip(Checkpoint_dir, Pre_dir):
+    cfg_from_list(['CONST.BATCH_SIZE', 1])
+    for checkpoint_dir, pre_dir, model_name in zip(Checkpoint_dir, Pre_dir, Model_names):
         # print(checkpoint_dir, pre_dir)
         weights = os.path.join(checkpoint_dir, 'checkpoint.tar')
-        # print(weights)
+        set_weights(weights)
+        set_model_name(model_name)
+        
+        # if pre_dir == './prediction/ResidualGRUNet_No_Regularition/':
+        #     cfg_from_list(['TEST.VOXEL_THRESH', [0.4]])
+
         for index in range(1, 11):
             checkpoint_path = os.path.join(checkpoint_dir, 'checkpoint.%d.tar' % (index*2000))
             # print(save_path)
@@ -32,13 +46,10 @@ if __name__ == "__main__":
                 os.remove(symlink_path)
             os.symlink("%s" % os.path.abspath(checkpoint_path), symlink_path)
 
-            # set batch_size = 1
-            cfg_from_list(['CONST.BATCH_SIZE', 1])
-
             # set_pred_file_name
             name = os.path.join(pre_dir, 'prediction.%d.obj' % (index*2000))
 
-            set_pred_file_name(name, weights)
+            set_pred_file_name(name)
 
             main()
             # Make a symlink to the latest network params
