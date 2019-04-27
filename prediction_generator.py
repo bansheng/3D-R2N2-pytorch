@@ -21,7 +21,9 @@ Pre_dir = [
 if __name__ == "__main__":
     # solver_init()
     for checkpoint_dir, pre_dir in zip(Checkpoint_dir, Pre_dir):
-        print(checkpoint_dir, pre_dir)
+        # print(checkpoint_dir, pre_dir)
+        weights = os.path.join(checkpoint_dir, 'checkpoint.tar')
+        # print(weights)
         for index in range(1, 11):
             checkpoint_path = os.path.join(checkpoint_dir, 'checkpoint.%d.tar' % (index*2000))
             # print(save_path)
@@ -36,7 +38,7 @@ if __name__ == "__main__":
             # set_pred_file_name
             name = os.path.join(pre_dir, 'prediction.%d.obj' % (index*2000))
 
-            set_pred_file_name(name)
+            set_pred_file_name(name, weights)
 
             main()
             # Make a symlink to the latest network params

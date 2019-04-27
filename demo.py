@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-27 10:17:24
+@lastTime: 2019-04-27 15:05:43
 '''
 import os
 import shutil
@@ -41,9 +41,11 @@ DEFAULT_WEIGHTS = 'output/ResidualGRUNet/default_model/checkpoint.tar'
 
 pred_file_name = ''
 
-def set_pred_file_name(name):
-    global pred_file_name
+def set_pred_file_name(name, weights):
+    global pred_file_name, DEFAULT_WEIGHTS
     pred_file_name = name
+    DEFAULT_WEIGHTS = weights
+
 
 def cmd_exists(cmd):
     return shutil.which(cmd) is not None
