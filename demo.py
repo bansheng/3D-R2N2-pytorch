@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-26 20:11:26
+@lastTime: 2019-04-27 10:17:24
 '''
 import os
 import shutil
@@ -70,21 +70,6 @@ def load_demo_images():
         # plt.show()
     return np.array(ims)
 
-
-# def solver_init():
-#     global demo_imgs, solver
-#     # load images
-#     demo_imgs = load_demo_images()
-
-#     # Download and load pretrained weights
-#     download_model(DEFAULT_WEIGHTS)
-
-#     # Use the default network model
-#     NetClass = load_model('ResidualGRUNet')
-
-#     # Define a network and a solver. Solver provides a wrapper for the test function.
-#     net = NetClass()  # instantiate a network
-#     solver = Solver(net)                # instantiate a solver
 
 def main():
     '''Main demo function'''
