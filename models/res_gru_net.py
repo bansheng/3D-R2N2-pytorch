@@ -3,9 +3,9 @@
 @Description:
 @Author: dingyadong
 @Github: https://github.com/bansheng
-@LastEditors: dingyadong
+@LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-21 22:21:23
+@lastTime: 2019-04-29 10:52:07
 '''
 import numpy as np
 # import torch
@@ -40,6 +40,8 @@ class ResidualGRUNet(BaseGRUNet):
                                self.n_fc_filters, self.h_shape, self.conv3d_filter_shape)
 
         self.decoder = decoder(self.n_deconvfilter, self.h_shape)
+        # [128, 128, 128, 64, 32, 2]
+        # batch_size, 128, 4, 4, 4)
 
         # initialize all the parameters
         self.parameter_init()
@@ -97,7 +99,7 @@ class encoder(nn.Module):
         self.bn6b = BatchNorm2d(n_convfilter[5])
 
         # pooling layer
-        self.pool = MaxPool2d(kernel_size=2, padding=1)
+        self.pool = MaxPool2d(kernel_size=2, padding=1) # batch_size, 256, 64, 64
 
         # nonlinearities of the network
         self.leaky_relu = LeakyReLU(negative_slope=0.01)
@@ -109,17 +111,17 @@ class encoder(nn.Module):
             input_shape, num_pooling=6)
         # define the fully connected layer
         self.fc7 = Linear(
-            int(n_convfilter[5] * fc7_feat_w * fc7_feat_h), n_fc_filters[0])
+            int(n_convfilter[5] * fc7_feat_w * fc7_feat_h), n_fc_filters[0]) # batch_size, 1024
 
         # define the FCConv3DLayers in 3d convolutional gru unit
         #conv3d_filter_shape = (self.n_deconvfilter[0], self.n_deconvfilter[0], 3, 3, 3)
         # 128*128*3*3*3
-        self.t_x_s_update = BN_FCConv3DLayer_torch(
+        self.t_x_s_update = BN_FCConv3DLayer_torch( # conv3d_filter_shape = [128, 128, 3, 3, 3] h_shape = (batch_size, 128, 4, 4, 4)
             n_fc_filters[0], conv3d_filter_shape, h_shape) #n_convfilter = [96, 128, 256, 256, 256, 256]
         self.t_x_s_reset = BN_FCConv3DLayer_torch(  # n_deconvfilter = [128, 128, 128, 64, 32, 2]
             n_fc_filters[0], conv3d_filter_shape, h_shape) # 1024
         self.t_x_rs = BN_FCConv3DLayer_torch(
-            n_fc_filters[0], conv3d_filter_shape, h_shape)
+            n_fc_filters[0], conv3d_filter_shape, h_shape) # 1024, 
 
     def forward(self, x, h, u, time):
         # for recurrent batch normalization, time is the current time step
@@ -195,19 +197,19 @@ class encoder(nn.Module):
         rect6 = self.leaky_relu(res6)
         pool6 = self.pool(rect6)
 
-        pool6 = pool6.view(pool6.size(0), -1)
+        pool6 = pool6.view(pool6.size(0), -1) # batch_size, 256*64*64
 
-        fc7 = self.fc7(pool6)
+        fc7 = self.fc7(pool6) #(batch_size, 1024)
         rect7 = self.leaky_relu(fc7)
 
         t_x_s_update = self.t_x_s_update(rect7, h, time)
         t_x_s_reset = self.t_x_s_reset(rect7, h, time)
 
-        update_gate = self.sigmoid(t_x_s_update)
+        update_gate = self.sigmoid(t_x_s_update) #都是0-1之间的值
         complement_update_gate = 1 - update_gate
-        reset_gate = self.sigmoid(t_x_s_reset)
+        reset_gate = self.sigmoid(t_x_s_reset) #都是0-1之间的值
 
-        rs = reset_gate * h
+        rs = reset_gate * h # h为隐藏状态
         t_x_rs = self.t_x_rs(rect7, rs, time)
         tanh_t_x_rs = self.tanh(t_x_rs)
 
@@ -224,7 +226,7 @@ class encoder(nn.Module):
         fc7_feat_h = img_h
         for i in range(num_pooling):
             # image downsampled by pooling layers
-            #w_out= np.floor((w_in+ 2*padding[0]- dilation[0]*(kernel_size[0]- 1)- 1)/stride[0]+ 1)
+            # w_out= np.floor((w_in+ 2*padding[0]- dilation[0]*(kernel_size[0]- 1)- 1)/stride[0]+ 1)
             fc7_feat_w = np.floor( # np.floor返回不大于输入参数的最大整数
                 (fc7_feat_w + 2 * 1 - 1 * (2 - 1) - 1) / 2 + 1)
             fc7_feat_h = np.floor(
@@ -292,7 +294,7 @@ class decoder(nn.Module):
         self.leaky_relu = LeakyReLU(negative_slope=0.01)
 
     def forward(self, gru_out):
-        unpool7 = self.unpool3d(gru_out)
+        unpool7 = self.unpool3d(gru_out) # (batch_size, 128, 8, 8, 8)
         conv7a = self.conv7a(unpool7)
         conv7a = self.bn7a(conv7a)
         rect7a = self.leaky_relu(conv7a)
@@ -302,7 +304,7 @@ class decoder(nn.Module):
         res7 = unpool7 + conv7b
         rect7 = self.leaky_relu(res7)
 
-        unpool8 = self.unpool3d(rect7)
+        unpool8 = self.unpool3d(rect7) # (batch_size, 128, 16, 16, 16)
         conv8a = self.conv8a(unpool8)
         conv8a = self.bn8a(conv8a)
         rect8a = self.leaky_relu(conv8a)
@@ -312,7 +314,7 @@ class decoder(nn.Module):
         res8 = unpool8 + conv8b
         rect8 = self.leaky_relu(res8)
 
-        unpool9 = self.unpool3d(rect8)
+        unpool9 = self.unpool3d(rect8) # (batch_size, 128, 32, 32, 32)
         conv9a = self.conv9a(unpool9)
         conv9a = self.bn9a(conv9a)
         rect9a = self.leaky_relu(conv9a)

@@ -3,9 +3,9 @@
 @Description:
 @Author: dingyadong
 @Github: https://github.com/bansheng
-@LastEditors: dingyadong
+@LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@LastEditTime: 2019-04-19 18:57:51
+@lastTime: 2019-04-29 10:47:37
 '''
 import torch
 from torch.autograd import Variable
@@ -45,7 +45,7 @@ class BaseGRUNet(Net):
         self.n_deconvfilter = [128, 128, 128, 64, 32, 2]
         # the size of the hidden state 隐藏层状态 4
         self.h_shape = (self.batch_size, self.n_deconvfilter[0], self.n_gru_vox, self.n_gru_vox,
-                        self.n_gru_vox)
+                        self.n_gru_vox) # （batch_size, 128, 4, 4, 4)
         # the filter shape of the 3d convolutional gru unit
         self.conv3d_filter_shape = (self.n_deconvfilter[0], self.n_deconvfilter[0], 3, 3, 3)
 
@@ -64,7 +64,7 @@ class BaseGRUNet(Net):
             raise Exception("subclass network of BaseGRUNet must define the \"decoder\" attribute")
 
         # initialize the hidden state and update gate
-        h = self.initHidden(self.h_shape)
+        h = self.initHidden(self.h_shape) # （batch_size, 128, 4, 4, 4)
         u = self.initHidden(self.h_shape)
 
         # a list used to store intermediate update gate activations
@@ -77,12 +77,12 @@ class BaseGRUNet(Net):
         for time in range(x.size(0)):
             gru_out, update_gate = self.encoder(x[time], h, u, time)
 
-            h = gru_out
+            h = gru_out #隐藏状态
 
-            u = update_gate
+            u = update_gate # 更新门
             u_list.append(u)
 
-        out = self.decoder(h)
+        out = self.decoder(h) # h = （batch_size, 128, 4, 4, 4)
         """
         If test is True and y is None, then the out is the [prediction].
         If test is True and y is not None, then the out is [prediction, loss].

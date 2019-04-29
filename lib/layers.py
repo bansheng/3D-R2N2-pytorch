@@ -48,13 +48,13 @@ class FCConv3DLayer_torch(nn.Module):
 
 
 class BN_FCConv3DLayer_torch(nn.Module):
-    def __init__(self, fc_w_fan_in, filter_shape, output_shape):
-        print("\ninitializing \"FCConv3DLayer_torch\"")
+    def __init__(self, fc_w_fan_in, filter_shape, output_shape): # filter_shape = [128, 128, 3, 3, 3]
+        print("\ninitializing \"FCConv3DLayer_torch\"") # output_shape = (batch_size, 128, 4, 4, 4)
         super(BN_FCConv3DLayer_torch, self).__init__()
         self.output_shape = output_shape
 
         #fc_layer is not the same as fc7 无偏置
-        self.fc_layer = nn.Linear(
+        self.fc_layer = nn.Linear( # fc_w_fan_in 1024 -> 128*4*4*4 = 8192
             fc_w_fan_in, int(np.prod(output_shape[1:])), bias=False)
 
         #filter_shape = (in_channels, out_channels, kernel_d, kernel_h, kernel_w) 无偏置
@@ -76,7 +76,12 @@ class BN_FCConv3DLayer_torch(nn.Module):
     def forward(self, fc7, h, time): # fc7为x h为h_{t-1}
         #fc7 is the leakyReLU-ed ouput of fc7 layer
         #h is the hidden state of the previous time step
+        # input:fc7 = [batch_size, 1024, 64, 64]
+        # input: h  = （batch_size, 128, 4, 4, 4)
         fc7 = self.fc_layer(fc7).view(*self.output_shape)
+        # [batch_size, 1024]
+        # --> [batch_size, 8192]
+        # --> [batch_size, 128, 4, 4, 4]
         bn_fc7 = self.bn1(
             fc7, time)  #the input of Recurrent_BatchNorm3d is (input_, time)
 
