@@ -85,6 +85,7 @@ __C.TRAIN.SAVE_FREQ = 2000  # weights will be overwritten every save_freq
 __C.TRAIN.PRINT_FREQ = 40
 __C.TRAIN.SHOW_LOSS = False
 __C.TRAIN.LOSS_CHANGE = False
+__C.TRAIN.NORMALIZATION = True #是否l2正则化
 #
 # Testing options
 #

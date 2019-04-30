@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-26 20:11:55
+@lastTime: 2019-04-30 11:12:49
 '''
 import os
 import sys
@@ -50,7 +50,10 @@ class Solver(object):
         """
         net = self.net
         lr = self.lr
-        w_decay = cfg.TRAIN.WEIGHT_DECAY
+        if cfg.TRAIN.NORMALIZATION:
+            w_decay = cfg.TRAIN.WEIGHT_DECAY
+        else:
+            w_decay = 0.
         if policy == 'sgd':
             momentum = cfg.TRAIN.MOMENTUM
             self.optimizer = SGD(net.parameters(), lr=lr, weight_decay=w_decay, momentum=momentum)
