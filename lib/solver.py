@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-30 11:12:49
+@lastTime: 2019-04-30 14:14:15
 '''
 import os
 import sys
@@ -103,7 +103,7 @@ class Solver(object):
         lr_steps = [int(k) for k in cfg.TRAIN.LEARNING_RATES.keys()]
 
         #Setup the lr_scheduler
-        self.lr_scheduler = lr_scheduler.MultiStepLR(self.optimizer, lr_steps, gamma=0.1)
+        self.lr_scheduler = lr_scheduler.MultiStepLR(self.optimizer, lr_steps, gamma=0.1) # gamma为下降系数
 
         start_iter = 0
         # Resume training
