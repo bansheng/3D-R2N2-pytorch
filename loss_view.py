@@ -3,26 +3,40 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-save_dir = 'output/ResidualGRUNet/default_model/'
+Save_dirs = [
+    './output/ResidualGRUNet/default_model',
+    # './output/GRUNet/default_model',
+    # './output/ResidualGRUNoBNNet/default_model',
+    # './output/ResidualGRUNet_theano/default_model',
+    './output/ResidualGRUNet_No_Regularition/default_model'
+]
 
+Labels = [
+    'ResidualGRUNet',
+    # 'GRUNet',
+    # 'ResidualGRUNoBNNet',
+    # 'ResidualGRUNet_theano',
+    'ResidualGRUNet_No_Regularition'
+]
 
 def file_read(files):
     # files [] 文件名列表
     ylines = []
-    for filename in files:
-        ylist = []
-        with open(os.path.join(save_dir, filename), 'r') as f:
-            ylist = f.readlines()
-        for y in ylist:
-            y = y.strip()
-        ylines.append(ylist)
+    for save_dir in Save_dirs:
+        for filename in files:
+            ylist = []
+            with open(os.path.join(save_dir, filename), 'r') as f:
+                ylist = f.readlines()
+            for y in ylist:
+                y = y.strip()
+            ylines.append(ylist[:20001:100])
     return ylines
 
 if __name__ == '__main__':
 
-    plt.figure(1, figsize=(12, 10))
-    lines = file_read(['loss.10000.txt'])
-    colors = ['red', 'blue', 'green', 'yellow']
+    plt.figure(1, figsize=(12, 5))
+    lines = file_read(['loss.20000.txt'])
+    colors = ['red', 'blue', 'green', 'purple', 'black']
     # lines[0] = lines[0][:2001]
     xmax = 0
     for id, axis_y in enumerate(lines):
@@ -31,9 +45,10 @@ if __name__ == '__main__':
         axis_x = np.linspace(0, num_of_points-1, num_of_points, dtype=np.float32) #0-10000
         axis_y = np.array(axis_y, dtype=np.float32)
         # print(axis_x.shape, axis_y.shape)
-        plt.plot(axis_x, axis_y.flatten(), color=colors[id], linewidth=0.5)
+        plt.plot(axis_x, axis_y.flatten(), color=colors[id], linewidth=1, label=Labels[id])
         print(colors[id])
 
+    plt.legend(loc='upper right')
     plt.xlim((0, xmax))
     plt.ylim((0, 1))
     plt.xlabel('train iter')

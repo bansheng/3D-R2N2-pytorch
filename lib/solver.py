@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-30 14:14:15
+@lastTime: 2019-05-10 13:12:38
 '''
 import os
 import sys
@@ -35,7 +35,6 @@ def max_or_nan(params):
 
 
 class Solver(object):
-
     def __init__(self, net):
         self.net = net
         self.lr = cfg.TRAIN.DEFAULT_LEARNING_RATE
@@ -56,9 +55,14 @@ class Solver(object):
             w_decay = 0.
         if policy == 'sgd':
             momentum = cfg.TRAIN.MOMENTUM
-            self.optimizer = SGD(net.parameters(), lr=lr, weight_decay=w_decay, momentum=momentum)
+            self.optimizer = SGD(
+                net.parameters(),
+                lr=lr,
+                weight_decay=w_decay,
+                momentum=momentum)
         elif policy == 'adam':
-            self.optimizer = Adam(net.parameters(), lr=lr, weight_decay=w_decay)
+            self.optimizer = Adam(
+                net.parameters(), lr=lr, weight_decay=w_decay)
         else:
             sys.exit('Error: Unimplemented optimization policy')
 
@@ -103,7 +107,8 @@ class Solver(object):
         lr_steps = [int(k) for k in cfg.TRAIN.LEARNING_RATES.keys()]
 
         #Setup the lr_scheduler
-        self.lr_scheduler = lr_scheduler.MultiStepLR(self.optimizer, lr_steps, gamma=0.1) # gamma为下降系数
+        self.lr_scheduler = lr_scheduler.MultiStepLR(
+            self.optimizer, lr_steps, gamma=0.1)  # gamma为下降系数
 
         start_iter = 0
         # Resume training
@@ -111,7 +116,7 @@ class Solver(object):
             self.load(cfg.CONST.WEIGHTS)
             start_iter = cfg.TRAIN.INITIAL_ITERATION
 
-        if cfg.TRAIN.SHOW_LOSS: # 要动态打印
+        if cfg.TRAIN.SHOW_LOSS:  # 要动态打印
             import matplotlib.pyplot as plot
             plot.figure(1, figsize=(12, 5))
             plot.ion()
@@ -138,7 +143,7 @@ class Solver(object):
             # print(loss.data.numpy())
             # print(loss.data.numpy().shape)
             # print(type(loss.data.numpy()))
-            if(torch.cuda.is_available()):
+            if (torch.cuda.is_available()):
                 training_losses.append(loss.cpu().data.numpy())
             else:
                 training_losses.append(loss.data.numpy())
@@ -147,23 +152,26 @@ class Solver(object):
             if train_ind in lr_steps:
                 #for pytorch optimizer, learning rate can only be set when the optimizer is created
                 #or using torch.optim.lr_scheduler
-                print('Learing rate decreased to %f: ' % cfg.TRAIN.LEARNING_RATES[str(train_ind)])
+                print('Learing rate decreased to %f: ' %
+                      cfg.TRAIN.LEARNING_RATES[str(train_ind)])
 
             # '''
             # Debugging modules
             # '''
-            
+
             # Print status, run validation, check divergence, and save model.
-            if train_ind % cfg.TRAIN.PRINT_FREQ == 0: #40
+            if train_ind % cfg.TRAIN.PRINT_FREQ == 0:  #40
                 # Print the current loss
-                print('%s Iter: %d Loss: %f' % (datetime.now(), train_ind, loss))
+                print(
+                    '%s Iter: %d Loss: %f' % (datetime.now(), train_ind, loss))
                 '''
                 @TODO(dingyadong): loss dynamic Visualization
                 '''
                 # plot
-                if(train_ind != 0):
-                    steps = np.linspace(0, train_ind, train_ind+1, dtype=np.float32)
-                    if cfg.TRAIN.SHOW_LOSS: # 要动态打印
+                if (train_ind != 0):
+                    steps = np.linspace(
+                        0, train_ind, train_ind + 1, dtype=np.float32)
+                    if cfg.TRAIN.SHOW_LOSS:  # 要动态打印
                         plot.plot(steps, training_losses, 'b-')
                         plot.draw()
                 # plot.pause(0.05)
@@ -193,8 +201,8 @@ class Solver(object):
             if loss.data > cfg.TRAIN.LOSS_LIMIT:
                 print("Cost exceeds the threshold. Stop training")
                 break
-        
-        if cfg.TRAIN.SHOW_LOSS: # 要动态打印
+
+        if cfg.TRAIN.SHOW_LOSS:  # 要动态打印ƒ
             plot.ioff()
             plot.show()
 
@@ -225,7 +233,8 @@ class Solver(object):
     def load(self, filename):
         if os.path.isfile(filename):
             print("loading checkpoint from '{}'".format(filename))
-            checkpoint = torch.load(filename, map_location=lambda storage, loc: storage)
+            checkpoint = torch.load(
+                filename, map_location=lambda storage, loc: storage)
 
             net_state = checkpoint['net_state']
             optim_state = checkpoint['optimizer_state']
@@ -266,12 +275,12 @@ class Solver(object):
         if len(results) > 2:
             activations = results[2:]
 
-        if y is None: #没有loss
+        if y is None:  #没有loss
             return prediction, activations
         else:
             loss = results[1]
             return prediction, loss, activations
-    
+
     # def graph_view(self, x):
     #     import hiddenlayer as hl
     #     x = torch.FloatTensor(x)
