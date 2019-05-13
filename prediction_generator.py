@@ -22,8 +22,8 @@ Model_names = [
     # 'ResidualGRUNet',
     # 'GRUNet',
     # 'ResidualGRUNoBNNet',
-    # 'ResidualGRUNet',
-    'ResidualGRUNet',
+    # 'ResidualGRUNet_theano', 这个部分不是由我们生成
+    'ResidualGRUNet_No_Regularition',
 ]
 
 if __name__ == "__main__":

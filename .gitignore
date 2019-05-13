@@ -28,3 +28,6 @@ lib/test.py
 
 # log
 /log
+
+# img/test*
+/imgs/test*
