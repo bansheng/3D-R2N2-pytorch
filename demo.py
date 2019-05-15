@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-27 15:55:57
+@lastTime: 2019-05-13 12:33:31
 '''
 import os
 import shutil
@@ -37,7 +37,7 @@ if sys.version_info < (3, 0):
 DEFAULT_WEIGHTS = 'output/ResidualGRUNet/default_model/checkpoint.tar'
 MODEL_NAME = 'ResidualGRUNet'
 pred_file_name = 'prediction.obj'
-
+demo_imgs = None
 
 def set_pred_file_name(name):
     global pred_file_name
@@ -63,34 +63,41 @@ def download_model(fn):
         # Download the file if doewn't exist
         print('Downloading a pretrained model')
         call([
-            'curl', 'ftp://cs.stanford.edu/cs/cvgl/ResidualGRUNet.npy',
+            'curl', 'http://dydcoding.cn/checkpoint.tar',
             '--create-dirs', '-o', fn
         ])
     else:
         print('A pretrained model detected!')
 
 
-def load_demo_images():
+'''
+@description: 设置读取的图片
+@param: imgs {type: str} 读取图片的路径
+@param: maxrange {type: int} 读取的图片序列
+@return: 输入网络的图片
+'''
+
+
+def load_demo_images(imgs='./imgs/', maxrange=3):
+    global demo_imgs
     ims = []
-    for i in range(3):
+    # print("maxrange", maxrange)
+    for i in range(maxrange):
         im = preprocess_img(
-            Image.open('imgs/%d.jpg' %  #进来的时候是127*127*3
-                       i).resize((127, 127)),
+            Image.open(imgs + '%d.png' %  #进来的时候是127*127*3
+                        i).resize((127, 127)),
             train=False)
         ims.append([np.array(im).transpose((2, 0, 1)).astype(np.float32)])
-        # plt.imshow(im)
-        # plt.show()
-    return np.array(ims)
+    # return np.array(ims)
+    demo_imgs = np.array(ims)
 
 
 def main():
     '''Main demo function'''
     # Save prediction into a file named 'prediction.obj' or the given argument
-    global pred_file_name
+    global pred_file_name, demo_imgs
     if not cfg.TEST.MULTITEST or pred_file_name == '':
         pred_file_name = sys.argv[1] if len(sys.argv) > 1 else 'prediction.obj'
-
-    demo_imgs = load_demo_images()
 
     # Download and load pretrained weights
     download_model(DEFAULT_WEIGHTS)
@@ -133,5 +140,6 @@ if __name__ == '__main__':
     # Set the batch size to 1
     cfg_from_list(['CONST.BATCH_SIZE', 1])
 
+    load_demo_images()
     # solver_init()
     main()

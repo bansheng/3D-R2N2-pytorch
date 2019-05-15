@@ -1,3 +1,12 @@
+# coding=UTF-8
+'''
+@Description: 用于创建Pytorch版本的网络的逐步重建3D信息
+@Author: dingyadong
+@Github: https://github.com/bansheng
+@LastAuthor: dingyadong
+@since: 2019-04-13 09:50:42
+@lastTime: 2019-05-13 10:11:28
+'''
 import os
 
 from demo import main, set_pred_file_name, set_model_name, set_weights
@@ -7,14 +16,12 @@ Checkpoint_dir = [
     # './output/ResidualGRUNet/default_model',
     # './output/GRUNet/default_model',
     # './output/ResidualGRUNoBNNet/default_model',
-    # './output/ResidualGRUNet_theano/default_model',
     './output/ResidualGRUNet_No_Regularition/default_model'
 ]
 Pre_dir = [
     # './prediction/ResidualGRUNet/',
     # './prediction/GRUNet/',
     # './prediction/ResidualGRUNoBNNet/',
-    # './prediction/ResidualGRUNet_theano/',
     './prediction/ResidualGRUNet_No_Regularition/',
 ]
 
@@ -22,7 +29,6 @@ Model_names = [
     # 'ResidualGRUNet',
     # 'GRUNet',
     # 'ResidualGRUNoBNNet',
-    # 'ResidualGRUNet_theano', 这个部分不是由我们生成
     'ResidualGRUNet_No_Regularition',
 ]
 
