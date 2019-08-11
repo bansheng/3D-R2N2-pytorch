@@ -44,9 +44,8 @@ git clone https://github.com/chrischoy/3D-R2N2.git
 
 ```
 cd 3D-R2N2
-pip install virtualenv
-virtualenv -p python3 --system-site-packages py3
-source py3/bin/activate
+conda create -n py-theano python=3.6
+source activate py-theano
 pip install -r requirements.txt
 cp .theanorc ~/.theanorc
 ```
