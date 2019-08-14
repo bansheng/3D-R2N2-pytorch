@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-04-29 10:52:07
+@lastTime: 2019-05-25 16:55:59
 '''
 import numpy as np
 # import torch
@@ -324,7 +324,7 @@ class decoder(nn.Module):
         conv9c = self.bn9c(conv9c)
         # residual connection before nonlinearity
         res9 = conv9c + conv9b
-        rect9 = self.leaky_relu(res9)
+        rect9 = self.leaky_relu(res9) # (batch_size, 64, 32, 32, 32)
 
         conv10a = self.conv10a(rect9)
         conv10a = self.bn10a(conv10a)
@@ -337,7 +337,7 @@ class decoder(nn.Module):
         conv10d = self.conv10d(rect9)
         conv10d = self.bn10d(conv10d)
         res10 = conv10c + conv10d
-        rect10 = self.leaky_relu(res10)
+        rect10 = self.leaky_relu(res10)  # (batch_size, 32, 32, 32, 32)
 
-        conv11 = self.conv11(rect10)
+        conv11 = self.conv11(rect10) # (batch_size, 2, 32, 32, 32)
         return conv11

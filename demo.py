@@ -5,7 +5,7 @@
 @Github: https://github.com/bansheng
 @LastAuthor: dingyadong
 @since: 2019-04-17 11:23:11
-@lastTime: 2019-05-13 12:33:31
+@lastTime: 2019-06-06 13:07:00
 '''
 import os
 import shutil
@@ -84,7 +84,8 @@ def load_demo_images(imgs='./imgs/', maxrange=3):
     # print("maxrange", maxrange)
     for i in range(maxrange):
         im = preprocess_img(
-            Image.open(imgs + '%d.png' %  #进来的时候是127*127*3
+            # Image.open(imgs + '%d.jpg' %  #进来的时候是127*127*3
+            Image.open(imgs + '0%d.png' %  #进来的时候是127*127*3
                         i).resize((127, 127)),
             train=False)
         ims.append([np.array(im).transpose((2, 0, 1)).astype(np.float32)])

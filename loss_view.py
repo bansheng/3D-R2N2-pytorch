@@ -5,21 +5,31 @@ import numpy as np
 
 Save_dirs = [
     './output/ResidualGRUNet/default_model',
-    './output/GRUNet/default_model',
+    # './output/GRUNet/default_model',
     # './output/ResidualGRUNoBNNet/default_model',
     # './output/ResidualGRUNet_theano/default_model',
-    # './output/ResidualGRUNet_No_Regularition/default_model'
+    './output/ResidualGRUNet_No_Regularition/default_model'
 ]
 
 Labels = [
     'ResidualGRUNet',
-    'GRUNet',
+    # 'GRUNet',
     # 'ResidualGRUNoBNNet',
     # 'ResidualGRUNet_theano',
-    # 'ResidualGRUNet_No_Regularition'
+    'ResidualGRUNet_No_Regularition'
 ]
 
 font = {'family': 'Times New Roman', 'weight': 'normal', 'size': 15}
+
+lineStyle = [
+    '-',
+    '-'
+]
+
+lineWidth = [
+    '1.5',
+    '0.5'
+]
 
 def file_read(files):
     # files [] 文件名列表
@@ -31,7 +41,7 @@ def file_read(files):
                 ylist = f.readlines()
             for y in ylist:
                 y = y.strip()
-            ylines.append(ylist[:201:1])
+            ylines.append(ylist[:20001:100])
     return ylines
 
 if __name__ == '__main__':
@@ -47,7 +57,7 @@ if __name__ == '__main__':
         axis_x = np.linspace(0, num_of_points-1, num_of_points, dtype=np.float32) #0-10000
         axis_y = np.array(axis_y, dtype=np.float32)
         # print(axis_x.shape, axis_y.shape)
-        plt.plot(axis_x, axis_y.flatten(), color=colors[id], linewidth=1, label=Labels[id])
+        plt.plot(axis_x, axis_y.flatten(), color='black', linewidth=lineWidth[id], linestyle=lineStyle[id], label=Labels[id])
         print(colors[id])
 
     plt.legend(loc='upper right', prop=font)
